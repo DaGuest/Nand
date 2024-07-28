@@ -7,4 +7,8 @@ VMTranslator::VMTranslator(std::string fileName)
 
 void VMTranslator::start()
 {
+    while (parser.hasMoreLines())
+    {
+        parser.advance();
+    }
 }

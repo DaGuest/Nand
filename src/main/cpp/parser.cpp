@@ -27,3 +27,11 @@ void Parser::advance()
 Parser::CommandType Parser::commandType()
 {
 }
+
+std::string Parser::arg1()
+{
+}
+
+std::string Parser::arg2()
+{
+}
