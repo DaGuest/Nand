@@ -65,15 +65,17 @@ public:
      * Should only be called if the current command is C_PUSH, C_POP, C_FUNCTION, C_CALL
      * @return The int representation of the second argument.
      */
-    std::string arg2();
+    int arg2();
 
 private:
     std::ifstream inputFile;
     std::string currentCommand;
+    std::vector<std::string> splitCommands;
     /**
-     * Split string on whitespace character.
+     * Splits string on whitespace character.
+     * The individual string are saved in splitCommands
      */
-    std::vector<std::string> splitString(std::string stringToSplit);
+    void splitString(std::string stringToSplit);
 
     /**
      * Checks if the current line is a valid line.

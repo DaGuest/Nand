@@ -19,23 +19,23 @@ bool Parser::hasMoreLines()
 
 void Parser::advance()
 {
-    while (hasMoreLines())
+    getline(inputFile, currentCommand);
+    while (!checkLine())
     {
-        getline(inputFile, currentCommand);
-        if (checkLine())
+        if (!hasMoreLines())
         {
-            std::cout << commandType() << std::endl;
+            return;
         }
         else
         {
-            continue;
+            getline(inputFile, currentCommand);
         }
     }
+    splitString(currentCommand);
 }
 
 Parser::CommandType Parser::commandType()
 {
-    std::vector<std::string> splitCommands = splitString(currentCommand);
     // Check for push/pop command
     if (splitCommands.size() > 1)
     {
@@ -57,17 +57,24 @@ Parser::CommandType Parser::commandType()
 
 std::string Parser::arg1()
 {
-    return "";
+    if (commandType() == Parser::C_ARITHMETIC)
+    {
+        return splitCommands.front();
+    }
+    else
+    {
+        return splitCommands.at(1);
+    }
 }
 
-std::string Parser::arg2()
+int Parser::arg2()
 {
-    return "";
+    return std::stoi(splitCommands.at(2));
 }
 
-std::vector<std::string> Parser::splitString(std::string stringToSplit)
+void Parser::splitString(std::string stringToSplit)
 {
-    std::vector<std::string> splitCommands;
+    splitCommands.clear();
     size_t pos = 0;
     std::string command;
     while ((pos = stringToSplit.find(" ")) != std::string::npos)
@@ -76,7 +83,7 @@ std::vector<std::string> Parser::splitString(std::string stringToSplit)
         splitCommands.push_back(command);
         stringToSplit.erase(0, pos + 1);
     }
-    return splitCommands;
+    splitCommands.push_back(stringToSplit);
 }
 
 bool Parser::checkLine()
