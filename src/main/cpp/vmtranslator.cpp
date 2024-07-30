@@ -1,14 +1,23 @@
-#include "vmtranslator.h";
+#include "vmtranslator.h"
+
+VMTranslator::VMTranslator() {}
 
 VMTranslator::VMTranslator(std::string fileName)
 {
-    parser = Parser(fileName);
+    parser = new Parser(fileName);
 }
 
 void VMTranslator::start()
 {
-    while (parser.hasMoreLines())
+    while (parser->hasMoreLines())
     {
-        parser.advance();
+        parser->advance();
     }
+}
+
+int main(int argc, char const *argv[])
+{
+    VMTranslator vmtranslator("../../test/resources/Project 7/Test.vm");
+    vmtranslator.start();
+    return 0;
 }

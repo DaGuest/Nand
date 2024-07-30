@@ -1,7 +1,9 @@
 #ifndef PARSER_H
 #define PARSER_H
-#include <iostream>;
-#include <fstream>;
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
 
 class Parser
 {
@@ -24,7 +26,7 @@ public:
     Parser();
 
     /**
-     * Opens the .vm file to be parsed.
+     * A parser that handles .vm files line by line.
      * @param fileName path to the filename of the xyz.vm file.
      */
     Parser(std::string fileName);
@@ -68,6 +70,16 @@ public:
 private:
     std::ifstream inputFile;
     std::string currentCommand;
+    /**
+     * Split string on whitespace character.
+     */
+    std::vector<std::string> splitString(std::string stringToSplit);
+
+    /**
+     * Checks if the current line is a valid line.
+     * Invalid lines are comments (//) or blank lines.
+     */
+    bool checkLine();
 };
 
 #endif
