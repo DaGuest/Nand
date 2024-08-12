@@ -67,9 +67,29 @@ void CodeWriter::writeArithmetic(std::string command)
 
 void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segment, int index)
 {
+    writeOutputLine("// " + std::to_string(commandType) + " " + segment + " " + std::to_string(index));
     if (commandType == Parser::C_POP)
     {
-        writeOutputLine("");
+        // Get address of segmentpointer
+        writeOutputLine("@" + getSegmentPointer(segment));
+        writeOutputLine("D=M");
+        // Add index to address; save into D
+        writeOutputLine("@" + std::to_string(index));
+        writeOutputLine("D=D+A");
+        // Get current SP address and use it to save D
+        writeOutputLine("@SP");
+        writeOutputLine("A=M");
+        writeOutputLine("M=D");
+        // Get stack value
+        writeOutputLine("A=A-1");
+        writeOutputLine("A=M");
+        writeOutputLine("M=D");
+        // SP--
+        writeOutputLine("@SP");
+        writeOutputLine("M=M-1");
+    }
+    else if (commandType == Parser::C_PUSH)
+    {
     }
 }
 
@@ -126,4 +146,25 @@ void CodeWriter::writeEQGTLTCommand(std::string commandLabel)
     writeOutputLine("M=0");
     writeSPStepCommand();
     writeLabel(commandLabel);
+}
+
+std::string CodeWriter::getSegmentPointer(std::string segmentLabel)
+{
+    if (segmentLabel == "local")
+    {
+        return "LCL";
+    }
+    else if (segmentLabel == "argument")
+    {
+        return "ARG";
+    }
+    else if (segmentLabel == "this")
+    {
+        return "THIS";
+    }
+    else if (segmentLabel == "that")
+    {
+        return "THAT";
+    }
+    return "";
 }

@@ -68,4 +68,10 @@ private:
      * @param command The label of either EQ, GT or LT
      */
     void writeEQGTLTCommand(std::string commandLabel);
+
+    /**
+     * Return the standard address of a given segment
+     * @param segmentLabel The string value of the segement label: local, argument, this or that.
+     */
+    std::string getSegmentPointer(std::string segmentLabel);
 };

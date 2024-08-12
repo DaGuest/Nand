@@ -17,6 +17,13 @@ void VMTranslator::start()
         {
             codeWriter->writeArithmetic(parser->arg1());
         }
+        else if (parser->commandType() == Parser::C_POP)
+        {
+            codeWriter->writePushPop(Parser::C_POP, parser->arg1(), parser->arg2());
+        }
+        else if (parser->commandType() == Parser::C_PUSH)
+        {
+        }
     }
 }
 
