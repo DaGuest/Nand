@@ -2,9 +2,10 @@
 
 VMTranslator::VMTranslator() {}
 
-VMTranslator::VMTranslator(std::string fileName)
+VMTranslator::VMTranslator(std::string inputFileName, std::string outputFileName)
 {
-    parser = new Parser(fileName);
+    parser = new Parser(inputFileName);
+    codeWriter = new CodeWriter(outputFileName);
 }
 
 void VMTranslator::start()
@@ -12,16 +13,16 @@ void VMTranslator::start()
     while (parser->hasMoreLines())
     {
         parser->advance();
-        if (parser->commandType() == Parser::C_PUSH)
+        if (parser->commandType() == Parser::C_ARITHMETIC)
         {
-            std::cout << parser->arg2() << std::endl;
+            codeWriter->writeArithmetic(parser->arg1());
         }
     }
 }
 
 int main(int argc, char const *argv[])
 {
-    VMTranslator vmtranslator("../../test/resources/Project 7/BasicTest.vm");
+    VMTranslator vmtranslator("../../test/resources/Project 7/BasicTest.vm", "../../test/resources/Project 7/output.asm");
     vmtranslator.start();
     return 0;
 }
