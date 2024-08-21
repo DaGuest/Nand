@@ -23,6 +23,7 @@ void VMTranslator::start()
         }
         else if (parser->commandType() == Parser::C_PUSH)
         {
+            codeWriter->writePushPop(Parser::C_PUSH, parser->arg1(), parser->arg2());
         }
     }
 }

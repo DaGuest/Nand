@@ -43,12 +43,6 @@ private:
     void writePopCommand();
 
     /**
-     * Pop two two values from the stack
-     * First value -> D, second value -> M
-     */
-    void writeDoublePopCommand();
-
-    /**
      * Write the assembly command: SP+1
      */
     void writeSPStepCommand();

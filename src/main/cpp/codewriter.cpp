@@ -14,11 +14,11 @@ void CodeWriter::writeArithmetic(std::string command)
     if (command == "add" || command == "sub")
     {
         // Pop 2 values from the stack
-        writeDoublePopCommand();
+        writePopCommand();
+        writeOutputLine("D=M");
+        writeOutputLine("A=A-1");
         // Perform addition/subtraction and save value in current stack slot
-        outputFile << "M=D" << (command == "add" ? "+" : "-") << "M" << std::endl;
-        // Set SP+1
-        writeSPStepCommand();
+        outputFile << "M=" << (command == "add" ? "D+M" : "M-D") << std::endl;
     }
     else if (command == "neg")
     {
@@ -70,26 +70,41 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
     writeOutputLine("// " + std::to_string(commandType) + " " + segment + " " + std::to_string(index));
     if (commandType == Parser::C_POP)
     {
-        // Get address of segmentpointer
         writeOutputLine("@" + getSegmentPointer(segment));
-        writeOutputLine("D=M");
-        // Add index to address; save into D
+        writeOutputLine(segment == "temp" ? "D=A" : "D=M");
         writeOutputLine("@" + std::to_string(index));
         writeOutputLine("D=D+A");
-        // Get current SP address and use it to save D
         writeOutputLine("@SP");
         writeOutputLine("A=M");
         writeOutputLine("M=D");
-        // Get stack value
         writeOutputLine("A=A-1");
+        writeOutputLine("D=M");
+        writeOutputLine("A=A+1");
         writeOutputLine("A=M");
         writeOutputLine("M=D");
-        // SP--
         writeOutputLine("@SP");
         writeOutputLine("M=M-1");
     }
     else if (commandType == Parser::C_PUSH)
     {
+        if (segment == "constant")
+        {
+            writeOutputLine("@" + std::to_string(index));
+            writeOutputLine("D=A");
+        }
+        else
+        {
+            writeOutputLine("@" + getSegmentPointer(segment));
+            writeOutputLine("D=M");
+            writeOutputLine("@" + std::to_string(index));
+            writeOutputLine("A=D+A");
+            writeOutputLine("D=M");
+        }
+        writeOutputLine("@SP");
+        writeOutputLine("A=M");
+        writeOutputLine("M=D");
+        writeOutputLine("@SP");
+        writeOutputLine("M=M+1");
     }
 }
 
@@ -102,13 +117,6 @@ void CodeWriter::writePopCommand()
 {
     writeOutputLine("@SP");
     writeOutputLine("AM=M-1");
-}
-
-void CodeWriter::writeDoublePopCommand()
-{
-    writePopCommand();
-    writeOutputLine("D=M");
-    writeOutputLine("A=A-1");
 }
 
 void CodeWriter::writeSPStepCommand()
@@ -134,18 +142,15 @@ void CodeWriter::writeEQGTLTCommand(std::string commandLabel)
     writePopCommand();
     writeOutputLine("D=M");
     writePopCommand();
-    // Subtract values
-    writeOutputLine("D=D-M");
-    // Set current stack value to -1 (TRUE)
+    writeOutputLine("D=M-D");
     writeOutputLine("M=-1");
     writeOutputLine("@" + commandLabel + std::to_string(labelIndex));
     writeOutputLine("D;J" + commandLabel);
-    // Reset current stack value to 0 (FALSE) if not equal
     writeOutputLine("@SP");
     writeOutputLine("A=M");
     writeOutputLine("M=0");
-    writeSPStepCommand();
     writeLabel(commandLabel);
+    writeSPStepCommand();
 }
 
 std::string CodeWriter::getSegmentPointer(std::string segmentLabel)
@@ -165,6 +170,10 @@ std::string CodeWriter::getSegmentPointer(std::string segmentLabel)
     else if (segmentLabel == "that")
     {
         return "THAT";
+    }
+    else if (segmentLabel == "temp")
+    {
+        return std::to_string(5);
     }
     return "";
 }
