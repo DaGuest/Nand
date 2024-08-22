@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <filesystem>
 #include "parser.h"
 
 class CodeWriter
@@ -11,7 +12,7 @@ public:
      * Outputs assembly code to the given output file.
      * @param fileName path to the output file.
      */
-    CodeWriter(std::string fileName);
+    CodeWriter(std::string outputPath, std::string inputPath);
 
     /**
      * Writes to the output file the assembly code that implements the given arithmetic-logical command.
@@ -33,19 +34,9 @@ public:
     void close();
 
 private:
+    std::string inputFileName;
     std::ofstream outputFile;
     int labelIndex;
-
-    /**
-     * Pop the last value of the stack
-     * Value is stored in D.
-     */
-    void writePopCommand();
-
-    /**
-     * Write the assembly command: SP+1
-     */
-    void writeSPStepCommand();
 
     /**
      * Write a label
@@ -65,7 +56,26 @@ private:
 
     /**
      * Return the standard address of a given segment
-     * @param segmentLabel The string value of the segement label: local, argument, this or that.
+     * @param segmentLabel The string value of the segment label: local, argument, this or that.
      */
-    std::string getSegmentPointer(std::string segmentLabel);
+    std::string getSegmentPointer(std::string segmentLabel, int index);
+
+    /**
+     * Write a pop command for POINTER and STATIC commands
+     * @param segmentLabel The string value of the segment label.
+     */
+    void writeShortPopCommand(std::string segmentLabel, int index);
+
+    /**
+     * Write a pop command for LCL, ARG, THIS and THAT commands.
+     * @param segmentLabel The string value of the segment label.
+     */
+    void writeLongPopCommand(std::string segmentLabel, int index);
+
+    /**
+     * A helper function that retrieves the stem filename from the given path.
+     * @param path The file path in string format.
+     * @return The filename stem with a '.' at the end.
+     */
+    std::string getFileName(std::string path);
 };

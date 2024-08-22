@@ -5,7 +5,7 @@ VMTranslator::VMTranslator() {}
 VMTranslator::VMTranslator(std::string inputFileName, std::string outputFileName)
 {
     parser = new Parser(inputFileName);
-    codeWriter = new CodeWriter(outputFileName);
+    codeWriter = new CodeWriter(outputFileName, inputFileName);
 }
 
 void VMTranslator::start()

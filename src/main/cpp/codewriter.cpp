@@ -2,9 +2,10 @@
 
 CodeWriter::CodeWriter() {};
 
-CodeWriter::CodeWriter(std::string fileName)
+CodeWriter::CodeWriter(std::string outputPath, std::string inputPath)
 {
-    outputFile.open(fileName);
+    CodeWriter::inputFileName = getFileName(inputPath);
+    outputFile.open(outputPath);
     labelIndex = 1;
 }
 
@@ -14,7 +15,8 @@ void CodeWriter::writeArithmetic(std::string command)
     if (command == "add" || command == "sub")
     {
         // Pop 2 values from the stack
-        writePopCommand();
+        writeOutputLine("@SP");
+        writeOutputLine("AM=M-1");
         writeOutputLine("D=M");
         writeOutputLine("A=A-1");
         // Perform addition/subtraction and save value in current stack slot
@@ -22,12 +24,11 @@ void CodeWriter::writeArithmetic(std::string command)
     }
     else if (command == "neg")
     {
-        // Pop value from the stack
-        writePopCommand();
-        // Negate the value
+        writeOutputLine("@SP");
+        writeOutputLine("AM=M-1");
         writeOutputLine("M=-M");
-        // Set SP+1
-        writeSPStepCommand();
+        writeOutputLine("@SP");
+        writeOutputLine("M=M+1");
     }
     else if (command == "eq")
     {
@@ -44,9 +45,11 @@ void CodeWriter::writeArithmetic(std::string command)
     else if (command == "and" || command == "or")
     {
         // Pop 2 value from the stack
-        writePopCommand();
+        writeOutputLine("@SP");
+        writeOutputLine("AM=M-1");
         writeOutputLine("D=M");
-        writePopCommand();
+        writeOutputLine("@SP");
+        writeOutputLine("AM=M-1");
         if (command == "and")
         {
             writeOutputLine("M=D&M");
@@ -55,13 +58,16 @@ void CodeWriter::writeArithmetic(std::string command)
         {
             writeOutputLine("M=D|M");
         }
-        writeSPStepCommand();
+        writeOutputLine("@SP");
+        writeOutputLine("M=M+1");
     }
     else if (command == "not")
     {
-        writePopCommand();
+        writeOutputLine("@SP");
+        writeOutputLine("AM=M-1");
         writeOutputLine("M=!M");
-        writeSPStepCommand();
+        writeOutputLine("@SP");
+        writeOutputLine("M=M+1");
     }
 }
 
@@ -70,20 +76,14 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
     writeOutputLine("// " + std::to_string(commandType) + " " + segment + " " + std::to_string(index));
     if (commandType == Parser::C_POP)
     {
-        writeOutputLine("@" + getSegmentPointer(segment));
-        writeOutputLine(segment == "temp" ? "D=A" : "D=M");
-        writeOutputLine("@" + std::to_string(index));
-        writeOutputLine("D=D+A");
-        writeOutputLine("@SP");
-        writeOutputLine("A=M");
-        writeOutputLine("M=D");
-        writeOutputLine("A=A-1");
-        writeOutputLine("D=M");
-        writeOutputLine("A=A+1");
-        writeOutputLine("A=M");
-        writeOutputLine("M=D");
-        writeOutputLine("@SP");
-        writeOutputLine("M=M-1");
+        if (segment == "pointer" || segment == "static")
+        {
+            writeShortPopCommand(segment, index);
+        }
+        else
+        {
+            writeLongPopCommand(segment, index);
+        }
     }
     else if (commandType == Parser::C_PUSH)
     {
@@ -92,9 +92,14 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
             writeOutputLine("@" + std::to_string(index));
             writeOutputLine("D=A");
         }
+        else if (segment == "pointer" || segment == "static")
+        {
+            writeOutputLine("@" + getSegmentPointer(segment, index));
+            writeOutputLine("D=M");
+        }
         else
         {
-            writeOutputLine("@" + getSegmentPointer(segment));
+            writeOutputLine("@" + getSegmentPointer(segment, index));
             writeOutputLine("D=M");
             writeOutputLine("@" + std::to_string(index));
             writeOutputLine("A=D+A");
@@ -113,18 +118,6 @@ void CodeWriter::close()
     outputFile.close();
 }
 
-void CodeWriter::writePopCommand()
-{
-    writeOutputLine("@SP");
-    writeOutputLine("AM=M-1");
-}
-
-void CodeWriter::writeSPStepCommand()
-{
-    writeOutputLine("@SP");
-    writeOutputLine("M=M+1");
-}
-
 void CodeWriter::writeLabel(std::string label)
 {
     outputFile << "(" << label << labelIndex << ")" << std::endl;
@@ -139,9 +132,11 @@ void CodeWriter::writeOutputLine(std::string command)
 void CodeWriter::writeEQGTLTCommand(std::string commandLabel)
 {
     // Pop 2 value from the stack
-    writePopCommand();
+    writeOutputLine("@SP");
+    writeOutputLine("AM=M-1");
     writeOutputLine("D=M");
-    writePopCommand();
+    writeOutputLine("@SP");
+    writeOutputLine("AM=M-1");
     writeOutputLine("D=M-D");
     writeOutputLine("M=-1");
     writeOutputLine("@" + commandLabel + std::to_string(labelIndex));
@@ -150,10 +145,11 @@ void CodeWriter::writeEQGTLTCommand(std::string commandLabel)
     writeOutputLine("A=M");
     writeOutputLine("M=0");
     writeLabel(commandLabel);
-    writeSPStepCommand();
+    writeOutputLine("@SP");
+    writeOutputLine("M=M+1");
 }
 
-std::string CodeWriter::getSegmentPointer(std::string segmentLabel)
+std::string CodeWriter::getSegmentPointer(std::string segmentLabel, int index)
 {
     if (segmentLabel == "local")
     {
@@ -175,5 +171,51 @@ std::string CodeWriter::getSegmentPointer(std::string segmentLabel)
     {
         return std::to_string(5);
     }
-    return "";
+    else if (segmentLabel == "static")
+    {
+        return inputFileName + std::to_string(index);
+    }
+    else if (segmentLabel == "pointer")
+    {
+        return index == 0 ? "THIS" : "THAT";
+    }
+    return std::to_string(index);
+}
+void CodeWriter::writeShortPopCommand(std::string segmentLabel, int index)
+{
+    writeOutputLine("@SP");
+    writeOutputLine("AM=M-1");
+    writeOutputLine("D=M");
+    writeOutputLine("@" + getSegmentPointer(segmentLabel, index));
+    writeOutputLine("M=D");
+}
+
+void CodeWriter::writeLongPopCommand(std::string segmentLabel, int index)
+{
+    writeOutputLine("@" + getSegmentPointer(segmentLabel, index));
+    writeOutputLine(segmentLabel == "temp" ? "D=A" : "D=M");
+    writeOutputLine("@" + std::to_string(index));
+    writeOutputLine("D=D+A");
+    writeOutputLine("@SP");
+    writeOutputLine("A=M");
+    writeOutputLine("M=D");
+    writeOutputLine("A=A-1");
+    writeOutputLine("D=M");
+    writeOutputLine("A=A+1");
+    writeOutputLine("A=M");
+    writeOutputLine("M=D");
+    writeOutputLine("@SP");
+    writeOutputLine("M=M-1");
+}
+
+std::string CodeWriter::getFileName(std::string path)
+{
+    size_t startPos = path.find_last_of("/");
+    size_t endPos = path.find_last_of(".") + 1;
+    if (startPos == std::string::npos)
+    {
+        startPos = 0;
+    }
+    path.erase(endPos, 2);
+    return path.substr(startPos + 1);
 }
