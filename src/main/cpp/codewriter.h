@@ -12,7 +12,7 @@ public:
      * Outputs assembly code to the given output file.
      * @param fileName path to the output file.
      */
-    CodeWriter(std::string outputPath, std::string inputPath);
+    CodeWriter(std::string inputPath);
 
     /**
      * Writes to the output file the assembly code that implements the given arithmetic-logical command.

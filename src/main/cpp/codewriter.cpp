@@ -2,21 +2,21 @@
 
 CodeWriter::CodeWriter() {};
 
-CodeWriter::CodeWriter(std::string outputPath, std::string inputPath)
+CodeWriter::CodeWriter(std::string inputPath)
 {
     CodeWriter::inputFileName = getFileName(inputPath);
-    outputFile.open(outputPath);
+    outputFile.open(inputFileName + "asm");
     labelIndex = 1;
 }
 
 void CodeWriter::writeArithmetic(std::string command)
 {
     writeOutputLine("// " + command);
+    writeOutputLine("@SP");
+    writeOutputLine("AM=M-1");
     if (command == "add" || command == "sub")
     {
         // Pop 2 values from the stack
-        writeOutputLine("@SP");
-        writeOutputLine("AM=M-1");
         writeOutputLine("D=M");
         writeOutputLine("A=A-1");
         // Perform addition/subtraction and save value in current stack slot
@@ -24,29 +24,18 @@ void CodeWriter::writeArithmetic(std::string command)
     }
     else if (command == "neg")
     {
-        writeOutputLine("@SP");
-        writeOutputLine("AM=M-1");
         writeOutputLine("M=-M");
         writeOutputLine("@SP");
         writeOutputLine("M=M+1");
     }
-    else if (command == "eq")
+    else if (command == "eq" || command == "lt" || command == "gt")
     {
-        writeEQGTLTCommand("EQ");
-    }
-    else if (command == "gt")
-    {
-        writeEQGTLTCommand("GT");
-    }
-    else if (command == "lt")
-    {
-        writeEQGTLTCommand("LT");
+        std::transform(command.begin(), command.end(), command.begin(), toupper);
+        writeEQGTLTCommand(command);
     }
     else if (command == "and" || command == "or")
     {
         // Pop 2 value from the stack
-        writeOutputLine("@SP");
-        writeOutputLine("AM=M-1");
         writeOutputLine("D=M");
         writeOutputLine("@SP");
         writeOutputLine("AM=M-1");
@@ -63,8 +52,6 @@ void CodeWriter::writeArithmetic(std::string command)
     }
     else if (command == "not")
     {
-        writeOutputLine("@SP");
-        writeOutputLine("AM=M-1");
         writeOutputLine("M=!M");
         writeOutputLine("@SP");
         writeOutputLine("M=M+1");
@@ -131,9 +118,6 @@ void CodeWriter::writeOutputLine(std::string command)
 
 void CodeWriter::writeEQGTLTCommand(std::string commandLabel)
 {
-    // Pop 2 value from the stack
-    writeOutputLine("@SP");
-    writeOutputLine("AM=M-1");
     writeOutputLine("D=M");
     writeOutputLine("@SP");
     writeOutputLine("AM=M-1");
@@ -217,5 +201,5 @@ std::string CodeWriter::getFileName(std::string path)
         startPos = 0;
     }
     path.erase(endPos, 2);
-    return path.substr(startPos + 1);
+    return path.substr(startPos);
 }

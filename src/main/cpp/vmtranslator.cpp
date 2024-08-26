@@ -2,10 +2,10 @@
 
 VMTranslator::VMTranslator() {}
 
-VMTranslator::VMTranslator(std::string inputFileName, std::string outputFileName)
+VMTranslator::VMTranslator(std::string inputFileName)
 {
     parser = new Parser(inputFileName);
-    codeWriter = new CodeWriter(outputFileName, inputFileName);
+    codeWriter = new CodeWriter(inputFileName);
 }
 
 void VMTranslator::start()
@@ -30,7 +30,7 @@ void VMTranslator::start()
 
 int main(int argc, char const *argv[])
 {
-    VMTranslator vmtranslator("../../test/resources/Project 7/BasicTest.vm", "../../test/resources/Project 7/output.asm");
+    VMTranslator vmtranslator(argv[1]);
     vmtranslator.start();
     return 0;
 }

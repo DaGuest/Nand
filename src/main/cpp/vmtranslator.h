@@ -7,7 +7,7 @@ class VMTranslator
 {
 public:
     VMTranslator();
-    VMTranslator(std::string inputFileName, std::string outputFileName);
+    VMTranslator(std::string outputFileName);
     void start();
 
 private:
