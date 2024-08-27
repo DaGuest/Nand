@@ -1,4 +1,4 @@
-#  Nand to Tetris assembler
+#  Nand to Tetris implementations
 
 This is my implementation of project 6 and 7 in the course Nand to Tetris part 1.
 

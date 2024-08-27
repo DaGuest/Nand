@@ -33,7 +33,7 @@ replay_pid*
 # C++ rules
 # -------- #
 
-/src/main/cpp/*
+/src/main/cpp/VMTranslator/*
 !*.cpp
 !*.h
 
