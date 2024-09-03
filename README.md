@@ -1,6 +1,6 @@
-#  Nand to Tetris assembler
+#  Nand to Tetris implementations
 
-This is my implementation of project 6 and 7 in the course Nand to Tetris part 1.
+This is my implementation of project 6 and 7 in the course Nand to Tetris part 2.
 
 ## Objective project 6
 The object was to build an assembly program that can translate Hack assembly code into machine code.
