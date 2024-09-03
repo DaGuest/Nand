@@ -4,8 +4,9 @@ CodeWriter::CodeWriter() {};
 
 CodeWriter::CodeWriter(std::string inputPath)
 {
-    CodeWriter::inputFileName = getFileName(inputPath);
-    outputFile.open(inputFileName + "asm");
+    inputPath.erase(inputPath.find_last_of(".") + 1, 2);
+    // CodeWriter::inputFileName = getFileName(inputPath);
+    outputFile.open(inputPath + "asm");
     labelIndex = 1;
 }
 

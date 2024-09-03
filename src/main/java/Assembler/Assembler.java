@@ -2,6 +2,7 @@ package Assembler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class Assembler {
     File file;
@@ -25,7 +26,9 @@ public class Assembler {
         symbolTable = new SymbolTable();
         InitializeSymbolTable();
         try {
-            outFile = new FileWriter("output.hack");
+            String stemFilename = Paths.get(filename).toString();
+            stemFilename = stemFilename.substring(0, stemFilename.lastIndexOf("."));
+            outFile = new FileWriter(stemFilename + ".hack");
         } catch (IOException e) {
             System.out.println("failed to open output file.");
         }
