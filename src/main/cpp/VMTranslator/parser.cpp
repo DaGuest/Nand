@@ -43,7 +43,27 @@ Parser::CommandType Parser::commandType()
         {
             return Parser::C_PUSH;
         }
-        else
+        else if (splitCommands.front() == "goto")
+        {
+            return Parser::C_GOTO;
+        }
+        else if (splitCommands.front() == "if-goto")
+        {
+            return Parser::C_IF;
+        }
+        else if (splitCommands.front() == "label")
+        {
+            return Parser::C_LABEL;
+        }
+        else if (splitCommands.front() == "call")
+        {
+            return Parser::C_CALL;
+        }
+        else if (splitCommands.front() == "function")
+        {
+            return Parser::C_FUNCTION;
+        }
+        else if (splitCommands.front() == "pop")
         {
             return Parser::C_POP;
         }
@@ -51,13 +71,20 @@ Parser::CommandType Parser::commandType()
     // Else: arithmetic command
     else
     {
-        return Parser::C_ARITHMETIC;
+        if (splitCommands.front() == "return")
+        {
+            return Parser::C_RETURN;
+        }
+        else
+        {
+            return Parser::C_ARITHMETIC;
+        }
     }
 }
 
 std::string Parser::arg1()
 {
-    if (commandType() == Parser::C_ARITHMETIC)
+    if (commandType() == Parser::C_ARITHMETIC || commandType() == Parser::C_RETURN)
     {
         return splitCommands.front();
     }

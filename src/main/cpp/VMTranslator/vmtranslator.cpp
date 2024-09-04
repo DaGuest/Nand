@@ -13,17 +13,21 @@ void VMTranslator::start()
     while (parser->hasMoreLines())
     {
         parser->advance();
-        if (parser->commandType() == Parser::C_ARITHMETIC)
+        switch (parser->commandType())
         {
+        case Parser::C_ARITHMETIC:
             codeWriter->writeArithmetic(parser->arg1());
-        }
-        else if (parser->commandType() == Parser::C_POP)
-        {
+            break;
+        case Parser::C_POP:
             codeWriter->writePushPop(Parser::C_POP, parser->arg1(), parser->arg2());
-        }
-        else if (parser->commandType() == Parser::C_PUSH)
-        {
+            break;
+        case Parser::C_PUSH:
             codeWriter->writePushPop(Parser::C_PUSH, parser->arg1(), parser->arg2());
+            break;
+        case Parser::C_GOTO:
+            codeWriter->writeGoto(parser->arg1());
+            break;
+        default:
         }
     }
 }
