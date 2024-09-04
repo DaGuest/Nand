@@ -75,20 +75,25 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
     }
     else if (commandType == Parser::C_PUSH)
     {
+        writeOutputLine("@" + getSegmentPointer(segment, index));
         if (segment == "constant")
         {
-            writeOutputLine("@" + std::to_string(index));
             writeOutputLine("D=A");
         }
         else if (segment == "pointer" || segment == "static")
         {
-            writeOutputLine("@" + getSegmentPointer(segment, index));
             writeOutputLine("D=M");
         }
         else
         {
-            writeOutputLine("@" + getSegmentPointer(segment, index));
-            writeOutputLine("D=M");
+            if (segment == "temp")
+            {
+                writeOutputLine("D=A");
+            }
+            else
+            {
+                writeOutputLine("D=M");
+            }
             writeOutputLine("@" + std::to_string(index));
             writeOutputLine("A=D+A");
             writeOutputLine("D=M");
