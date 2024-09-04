@@ -106,6 +106,12 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
     }
 }
 
+void CodeWriter::writeGoto(std::string gotoLabel)
+{
+    writeOutputLine("// GOTO command");
+    writeOutputLine(gotoLabel);
+}
+
 void CodeWriter::close()
 {
     outputFile.close();

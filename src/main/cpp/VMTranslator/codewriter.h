@@ -30,6 +30,11 @@ public:
     void writePushPop(Parser::CommandType commandType, std::string segment, int index);
 
     /**
+     * Writes to the output file the assembly code that implements the given goto command.
+     */
+    void writeGoto(std::string gotoLabel);
+
+    /**
      * Closes the outpufile.
      */
     void close();
