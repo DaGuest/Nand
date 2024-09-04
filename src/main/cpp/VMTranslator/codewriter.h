@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <filesystem>
+#include <algorithm>
 #include "parser.h"
 
 class CodeWriter
