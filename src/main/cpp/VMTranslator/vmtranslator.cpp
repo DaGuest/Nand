@@ -30,6 +30,9 @@ void VMTranslator::start()
         case Parser::C_LABEL:
             codeWriter->writeLabel(parser->arg1());
             break;
+        case Parser::C_IF:
+            codeWriter->writeIf(parser->arg1());
+            break;
         default:
             break;
         }

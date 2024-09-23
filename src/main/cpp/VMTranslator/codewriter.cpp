@@ -113,6 +113,15 @@ void CodeWriter::writeGoto(std::string gotoLabel)
     writeOutputLine("0;JMP");
 }
 
+void CodeWriter::writeIf(std::string gotoLabel)
+{
+    writeOutputLine("@SP");
+    writeOutputLine("AM=M-1");
+    writeOutputLine("D=M");
+    writeOutputLine("@" + gotoLabel);
+    writeOutputLine("D;JLT");
+}
+
 void CodeWriter::close()
 {
     outputFile.close();
