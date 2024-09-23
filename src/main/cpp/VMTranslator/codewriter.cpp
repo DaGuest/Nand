@@ -119,8 +119,7 @@ void CodeWriter::close()
 
 void CodeWriter::writeLabel(std::string label)
 {
-    outputFile << "(" << label << labelIndex << ")" << std::endl;
-    labelIndex++;
+    outputFile << "(" << label << ")" << std::endl;
 }
 
 void CodeWriter::writeOutputLine(std::string command)
@@ -140,7 +139,8 @@ void CodeWriter::writeEQGTLTCommand(std::string commandLabel)
     writeOutputLine("@SP");
     writeOutputLine("A=M");
     writeOutputLine("M=0");
-    writeLabel(commandLabel);
+    writeOutputLine(commandLabel + std::to_string(labelIndex));
+    labelIndex++;
     writeOutputLine("@SP");
     writeOutputLine("M=M+1");
 }
