@@ -35,6 +35,11 @@ public:
     void writeGoto(std::string gotoLabel);
 
     /**
+     * Writes the assembly code for the if-goto command.
+     */
+    void writeIf(std::string gotoLabel);
+
+    /**
      * Closes the outpufile.
      */
     void close();
