@@ -109,7 +109,8 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
 void CodeWriter::writeGoto(std::string gotoLabel)
 {
     writeOutputLine("// GOTO command");
-    writeOutputLine(gotoLabel);
+    writeOutputLine("@" + gotoLabel);
+    writeOutputLine("0;JMP");
 }
 
 void CodeWriter::close()
