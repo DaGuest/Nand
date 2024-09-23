@@ -39,15 +39,15 @@ public:
      */
     void close();
 
-private:
-    std::string inputFileName;
-    std::ofstream outputFile;
-    int labelIndex;
-
     /**
      * Write a label
      */
     void writeLabel(std::string label);
+
+private:
+    std::string inputFileName;
+    std::ofstream outputFile;
+    int labelIndex;
 
     /**
      * Write a line into the output file.
