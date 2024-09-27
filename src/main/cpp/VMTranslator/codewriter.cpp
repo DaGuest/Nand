@@ -158,6 +158,10 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
     writeLabel(returnLabel);
 }
 
+void CodeWriter::writeFunction(std::string functionName, int nVars)
+{
+}
+
 void CodeWriter::close()
 {
     outputFile.close();
