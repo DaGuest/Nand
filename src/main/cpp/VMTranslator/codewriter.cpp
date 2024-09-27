@@ -158,6 +158,17 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
     writeLabel(returnLabel);
 }
 
+void CodeWriter::writeFunction(std::string functionName, int nVars)
+{
+    writeOutputLine("// FUNCTION command");
+    writeLabel(inputFileName + functionName);
+    // push n local vars onto stack with value 0
+    for (int i = 0; i < nVars; i++)
+    {
+        writePushPop(Parser::C_PUSH, "constant", 0);
+    }
+}
+
 void CodeWriter::close()
 {
     outputFile.close();

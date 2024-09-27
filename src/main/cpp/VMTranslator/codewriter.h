@@ -45,6 +45,11 @@ public:
     void writeCall(std::string functionName, int nArgs);
 
     /**
+     * Writes the assembly code for the FUNCTION command.
+     */
+    void writeFunction(std::string funtionName, int nVars);
+
+    /**
      * Closes the outpufile.
      */
     void close();
