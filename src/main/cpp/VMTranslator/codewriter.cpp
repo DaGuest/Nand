@@ -5,9 +5,10 @@ CodeWriter::CodeWriter() {};
 CodeWriter::CodeWriter(std::string inputPath)
 {
     inputPath.erase(inputPath.find_last_of(".") + 1, 2);
-    // CodeWriter::inputFileName = getFileName(inputPath);
+    inputFileName = getFileName(inputPath);
     outputFile.open(inputPath + "asm");
     labelIndex = 1;
+    returnIndex = 1;
 }
 
 void CodeWriter::writeArithmetic(std::string command)
@@ -94,15 +95,14 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
             {
                 writeOutputLine("D=M");
             }
-            writeOutputLine("@" + std::to_string(index));
-            writeOutputLine("A=D+A");
-            writeOutputLine("D=M");
+            if (index > 0)
+            {
+                writeOutputLine("@" + std::to_string(index));
+                writeOutputLine("A=D+A");
+                writeOutputLine("D=M");
+            }
         }
-        writeOutputLine("@SP");
-        writeOutputLine("A=M");
-        writeOutputLine("M=D");
-        writeOutputLine("@SP");
-        writeOutputLine("M=M+1");
+        writeFinalPushCommand();
     }
 }
 
@@ -115,11 +115,47 @@ void CodeWriter::writeGoto(std::string gotoLabel)
 
 void CodeWriter::writeIf(std::string gotoLabel)
 {
+    writeOutputLine("// IF-GOTO command");
     writeOutputLine("@SP");
     writeOutputLine("AM=M-1");
     writeOutputLine("D=M");
     writeOutputLine("@" + gotoLabel);
     writeOutputLine("D;JLT");
+}
+
+void CodeWriter::writeCall(std::string functionName, int nArgs)
+{
+    writeOutputLine("// CALL command");
+    // Push return address onto stack
+    std::string returnLabel = inputFileName + functionName + "$ret." + std::to_string(returnIndex++);
+    writeOutputLine("@" + returnLabel);
+    writeOutputLine("D=A");
+    writeFinalPushCommand();
+    // Push lcl, arg, this and that onto stack
+    writePushPop(Parser::C_PUSH, "local", 0);
+    writePushPop(Parser::C_PUSH, "argument", 0);
+    writePushPop(Parser::C_PUSH, "this", 0);
+    writePushPop(Parser::C_PUSH, "that", 0);
+    // Reposition ARG
+    writeOutputLine("// Reposition ARG");
+    writeOutputLine("@SP");
+    writeOutputLine("D=M");
+    writeOutputLine("@5");
+    writeOutputLine("D=D-A");
+    writeOutputLine("@" + std::to_string(nArgs));
+    writeOutputLine("D=D-A");
+    writeOutputLine("@ARG");
+    writeOutputLine("M=D");
+    // Reposition LCL
+    writeOutputLine("// Reposition LCL");
+    writeOutputLine("@SP");
+    writeOutputLine("D=M");
+    writeOutputLine("@LCL");
+    writeOutputLine("M=D");
+    // Goto functionname
+    writeGoto(inputFileName + functionName);
+    // Inject returnAddress label
+    writeLabel(returnLabel);
 }
 
 void CodeWriter::close()
@@ -214,9 +250,18 @@ void CodeWriter::writeLongPopCommand(std::string segmentLabel, int index)
     writeOutputLine("M=M-1");
 }
 
+void CodeWriter::writeFinalPushCommand()
+{
+    writeOutputLine("@SP");
+    writeOutputLine("A=M");
+    writeOutputLine("M=D");
+    writeOutputLine("@SP");
+    writeOutputLine("M=M+1");
+}
+
 std::string CodeWriter::getFileName(std::string path)
 {
-    size_t startPos = path.find_last_of("/");
+    size_t startPos = path.find_last_of("/") + 1;
     size_t endPos = path.find_last_of(".") + 1;
     if (startPos == std::string::npos)
     {
