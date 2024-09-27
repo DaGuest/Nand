@@ -40,6 +40,11 @@ public:
     void writeIf(std::string gotoLabel);
 
     /**
+     * Writes the assembly code for the call command.
+     */
+    void writeCall(std::string functionName, int nArgs);
+
+    /**
      * Closes the outpufile.
      */
     void close();
@@ -53,6 +58,7 @@ private:
     std::string inputFileName;
     std::ofstream outputFile;
     int labelIndex;
+    int returnIndex;
 
     /**
      * Write a line into the output file.
@@ -82,6 +88,11 @@ private:
      * @param segmentLabel The string value of the segment label.
      */
     void writeLongPopCommand(std::string segmentLabel, int index);
+
+    /**
+     * Writes the value in D onto the stack
+     */
+    void writeFinalPushCommand();
 
     /**
      * A helper function that retrieves the stem filename from the given path.
