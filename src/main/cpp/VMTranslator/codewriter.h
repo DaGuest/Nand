@@ -50,6 +50,11 @@ public:
     void writeFunction(std::string funtionName, int nVars);
 
     /**
+     * Writes the assembly code for the RETURN command.
+     */
+    void writeReturn();
+
+    /**
      * Closes the outpufile.
      */
     void close();

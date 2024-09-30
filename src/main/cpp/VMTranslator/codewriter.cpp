@@ -169,6 +169,10 @@ void CodeWriter::writeFunction(std::string functionName, int nVars)
     }
 }
 
+void CodeWriter::writeReturn()
+{
+}
+
 void CodeWriter::close()
 {
     outputFile.close();
