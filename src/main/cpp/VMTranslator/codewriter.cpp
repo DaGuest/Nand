@@ -173,8 +173,10 @@ void CodeWriter::writeReturn()
     writeReplaceCommand("TEMP", 5);
     // ARG = pop()
     writeOutputLine("@SP");
-    writeOutputLine("AMD=M-1");
+    writeOutputLine("AM=M-1");
+    writeOutputLine("D=M");
     writeOutputLine("@ARG");
+    writeOutputLine("A=M");
     writeOutputLine("M=D");
     // SP = ARG+1
     writeOutputLine("D=A+1");
@@ -188,7 +190,10 @@ void CodeWriter::writeReturn()
     writeReplaceCommand("ARG", 3);
     // LCL = *)endFrame-4)
     writeReplaceCommand("LCL", 4);
-    writeGoto("TEMP");
+    // Goto returnAddress
+    writeOutputLine("@TEMP");
+    writeOutputLine("A=M");
+    writeOutputLine("0;JMP");
 }
 
 void CodeWriter::close()
@@ -295,7 +300,7 @@ void CodeWriter::writeFinalPushCommand()
 void CodeWriter::writeReplaceCommand(std::string label, int steps)
 {
     writeOutputLine("@LCL");
-    writeOutputLine("D=A");
+    writeOutputLine("D=M");
     writeOutputLine("@" + std::to_string(steps));
     writeOutputLine("A=D-A");
     writeOutputLine("D=M");
