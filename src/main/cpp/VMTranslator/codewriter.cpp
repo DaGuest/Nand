@@ -171,6 +171,24 @@ void CodeWriter::writeFunction(std::string functionName, int nVars)
 
 void CodeWriter::writeReturn()
 {
+    // temp 0 = *(endFrame-5)
+    writeOutputLine("@LCL");
+    writeOutputLine("D=A");
+    writeOutputLine("@5");
+    writeOutputLine("A=D-A");
+    writeOutputLine("D=M");
+    writeOutputLine("@SP");
+    writeOutputLine("M=D");
+    // ARG = pop()
+    writeOutputLine("@SP");
+    writeOutputLine("AMD=M-1");
+    writeOutputLine("@ARG");
+    writeOutputLine("M=D");
+    // SP = ARG+1
+    writeOutputLine("D=A+1");
+    writeOutputLine("@SP");
+    writeOutputLine("M=D");
+    // THAT = *(endFrame-1)
 }
 
 void CodeWriter::close()
