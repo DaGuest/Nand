@@ -94,9 +94,6 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
             else
             {
                 writeOutputLine("D=M");
-            }
-            if (index > 0)
-            {
                 writeOutputLine("@" + std::to_string(index));
                 writeOutputLine("A=D+A");
                 writeOutputLine("D=M");
@@ -120,7 +117,7 @@ void CodeWriter::writeIf(std::string gotoLabel)
     writeOutputLine("AM=M-1");
     writeOutputLine("D=M");
     writeOutputLine("@" + gotoLabel);
-    writeOutputLine("D;JLT");
+    writeOutputLine("D;JNE");
 }
 
 void CodeWriter::writeCall(std::string functionName, int nArgs)
