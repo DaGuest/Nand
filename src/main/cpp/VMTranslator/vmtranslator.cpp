@@ -35,8 +35,13 @@ void VMTranslator::start()
             break;
         case Parser::C_CALL:
             codeWriter->writeCall(parser->arg1(), parser->arg2());
+            break;
         case Parser::C_FUNCTION:
             codeWriter->writeFunction(parser->arg1(), parser->arg2());
+            break;
+        case Parser::C_RETURN:
+            codeWriter->writeReturn();
+            break;
         default:
             break;
         }

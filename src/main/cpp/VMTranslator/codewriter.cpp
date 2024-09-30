@@ -171,6 +171,7 @@ void CodeWriter::writeFunction(std::string functionName, int nVars)
 
 void CodeWriter::writeReturn()
 {
+    writeOutputLine("// RETURN command");
     // temp 0 = *(endFrame-5)
     writeReplaceCommand("TEMP", 5);
     // ARG = pop()
@@ -190,6 +191,7 @@ void CodeWriter::writeReturn()
     writeReplaceCommand("ARG", 3);
     // LCL = *)endFrame-4)
     writeReplaceCommand("LCL", 4);
+    writeGoto("TEMP");
 }
 
 void CodeWriter::close()
