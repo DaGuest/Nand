@@ -292,6 +292,17 @@ void CodeWriter::writeFinalPushCommand()
     writeOutputLine("M=M+1");
 }
 
+void CodeWriter::writeReplaceCommand(std::string label, int steps)
+{
+    writeOutputLine("@LCL");
+    writeOutputLine("D=A");
+    writeOutputLine("@" + std::to_string(steps));
+    writeOutputLine("A=D-A");
+    writeOutputLine("D=M");
+    writeOutputLine("@" + label);
+    writeOutputLine("M=D");
+}
+
 std::string CodeWriter::getFileName(std::string path)
 {
     size_t startPos = path.find_last_of("/") + 1;

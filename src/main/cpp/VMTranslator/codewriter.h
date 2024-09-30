@@ -105,6 +105,13 @@ private:
     void writeFinalPushCommand();
 
     /**
+     * Write a LABEL = *(endFrame - x) command where x is the amount of steps back from endFrame.
+     * @param label The label that will have it's address replaced.
+     * @param steps The numbers of steps to take back from endFrame.
+     */
+    void writeReplaceCommand(std::string label, int steps);
+
+    /**
      * A helper function that retrieves the stem filename from the given path.
      * @param path The file path in string format.
      * @return The filename stem with a '.' at the end.
