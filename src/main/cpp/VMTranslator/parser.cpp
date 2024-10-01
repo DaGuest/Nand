@@ -36,7 +36,6 @@ void Parser::advance()
 
 Parser::CommandType Parser::commandType()
 {
-    // Check for push/pop command
     if (splitCommands.size() > 1)
     {
         if (splitCommands.front() == "push")
@@ -66,6 +65,10 @@ Parser::CommandType Parser::commandType()
         else if (splitCommands.front() == "pop")
         {
             return Parser::C_POP;
+        }
+        else
+        {
+            return Parser::C_NONE;
         }
     }
     // Else: arithmetic command
@@ -102,7 +105,8 @@ int Parser::arg2()
 void Parser::splitString(std::string stringToSplit)
 {
     splitCommands.clear();
-    size_t pos = 0;
+    size_t pos = stringToSplit.find_first_not_of(" \t");
+    stringToSplit.erase(0, pos);
     std::string command;
     while ((pos = stringToSplit.find(" ")) != std::string::npos)
     {

@@ -50,6 +50,11 @@ public:
     void writeFunction(std::string funtionName, int nVars);
 
     /**
+     * Writes the assembly code for the RETURN command.
+     */
+    void writeReturn();
+
+    /**
      * Closes the outpufile.
      */
     void close();
@@ -98,6 +103,13 @@ private:
      * Writes the value in D onto the stack
      */
     void writeFinalPushCommand();
+
+    /**
+     * Write a LABEL = *(endFrame - x) command where x is the amount of steps back from endFrame.
+     * @param label The label that will have it's address replaced.
+     * @param steps The numbers of steps to take back from endFrame.
+     */
+    void writeReplaceCommand(std::string label, int steps);
 
     /**
      * A helper function that retrieves the stem filename from the given path.

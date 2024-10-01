@@ -94,9 +94,6 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
             else
             {
                 writeOutputLine("D=M");
-            }
-            if (index > 0)
-            {
                 writeOutputLine("@" + std::to_string(index));
                 writeOutputLine("A=D+A");
                 writeOutputLine("D=M");
@@ -120,7 +117,7 @@ void CodeWriter::writeIf(std::string gotoLabel)
     writeOutputLine("AM=M-1");
     writeOutputLine("D=M");
     writeOutputLine("@" + gotoLabel);
-    writeOutputLine("D;JLT");
+    writeOutputLine("D;JNE");
 }
 
 void CodeWriter::writeCall(std::string functionName, int nArgs)
@@ -167,6 +164,36 @@ void CodeWriter::writeFunction(std::string functionName, int nVars)
     {
         writePushPop(Parser::C_PUSH, "constant", 0);
     }
+}
+
+void CodeWriter::writeReturn()
+{
+    writeOutputLine("// RETURN command");
+    // Save return address
+    writeReplaceCommand("TEMP", 5);
+    // Pop return value from stack and save in ARG
+    writeOutputLine("@SP");
+    writeOutputLine("AM=M-1");
+    writeOutputLine("D=M");
+    writeOutputLine("@ARG");
+    writeOutputLine("A=M");
+    writeOutputLine("M=D");
+    // Set SP to ARG + 1
+    writeOutputLine("D=A+1");
+    writeOutputLine("@SP");
+    writeOutputLine("M=D");
+    // Restore THAT
+    writeReplaceCommand("THAT", 1);
+    // Restore THIS
+    writeReplaceCommand("THIS", 2);
+    // Restore ARG
+    writeReplaceCommand("ARG", 3);
+    // Restore LCL
+    writeReplaceCommand("LCL", 4);
+    // Goto returnAddress
+    writeOutputLine("@TEMP");
+    writeOutputLine("A=M");
+    writeOutputLine("0;JMP");
 }
 
 void CodeWriter::close()
@@ -268,6 +295,17 @@ void CodeWriter::writeFinalPushCommand()
     writeOutputLine("M=D");
     writeOutputLine("@SP");
     writeOutputLine("M=M+1");
+}
+
+void CodeWriter::writeReplaceCommand(std::string label, int steps)
+{
+    writeOutputLine("@LCL");
+    writeOutputLine("D=M");
+    writeOutputLine("@" + std::to_string(steps));
+    writeOutputLine("A=D-A");
+    writeOutputLine("D=M");
+    writeOutputLine("@" + label);
+    writeOutputLine("M=D");
 }
 
 std::string CodeWriter::getFileName(std::string path)
