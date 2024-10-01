@@ -169,26 +169,26 @@ void CodeWriter::writeFunction(std::string functionName, int nVars)
 void CodeWriter::writeReturn()
 {
     writeOutputLine("// RETURN command");
-    // temp 0 = *(endFrame-5)
+    // Save return address
     writeReplaceCommand("TEMP", 5);
-    // ARG = pop()
+    // Pop return value from stack and save in ARG
     writeOutputLine("@SP");
     writeOutputLine("AM=M-1");
     writeOutputLine("D=M");
     writeOutputLine("@ARG");
     writeOutputLine("A=M");
     writeOutputLine("M=D");
-    // SP = ARG+1
+    // Set SP to ARG + 1
     writeOutputLine("D=A+1");
     writeOutputLine("@SP");
     writeOutputLine("M=D");
-    // THAT = *(endFrame-1)
+    // Restore THAT
     writeReplaceCommand("THAT", 1);
-    // THIS = *(endFrame-2)
+    // Restore THIS
     writeReplaceCommand("THIS", 2);
-    // ARG = *(endFrame-3)
+    // Restore ARG
     writeReplaceCommand("ARG", 3);
-    // LCL = *(endFrame-4)
+    // Restore LCL
     writeReplaceCommand("LCL", 4);
     // Goto returnAddress
     writeOutputLine("@TEMP");
