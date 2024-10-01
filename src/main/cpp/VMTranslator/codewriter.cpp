@@ -184,11 +184,11 @@ void CodeWriter::writeReturn()
     writeOutputLine("M=D");
     // THAT = *(endFrame-1)
     writeReplaceCommand("THAT", 1);
-    // THIS = *)endFrame-2)
+    // THIS = *(endFrame-2)
     writeReplaceCommand("THIS", 2);
-    // ARG = *)endFrame-3)
+    // ARG = *(endFrame-3)
     writeReplaceCommand("ARG", 3);
-    // LCL = *)endFrame-4)
+    // LCL = *(endFrame-4)
     writeReplaceCommand("LCL", 4);
     // Goto returnAddress
     writeOutputLine("@TEMP");
