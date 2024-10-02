@@ -55,6 +55,12 @@ public:
     void writeReturn();
 
     /**
+     * Sets the current fileName of the .vm file that is being translated.
+     * @param fileName The stem of the fileName to be used (without extensions or path chars)
+     */
+    void setFileName(std::string fileName);
+
+    /**
      * Closes the outpufile.
      */
     void close();

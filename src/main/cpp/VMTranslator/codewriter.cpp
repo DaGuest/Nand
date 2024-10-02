@@ -196,6 +196,11 @@ void CodeWriter::writeReturn()
     writeOutputLine("0;JMP");
 }
 
+void CodeWriter::setFileName(std::string fileName)
+{
+    inputFileName = fileName;
+}
+
 void CodeWriter::close()
 {
     outputFile.close();
@@ -312,10 +317,6 @@ std::string CodeWriter::getFileName(std::string path)
 {
     size_t startPos = path.find_last_of("/") + 1;
     size_t endPos = path.find_last_of(".") + 1;
-    if (startPos == std::string::npos)
-    {
-        startPos = 0;
-    }
     path.erase(endPos, 2);
     return path.substr(startPos);
 }
