@@ -5,17 +5,18 @@ VMTranslator::VMTranslator() {}
 VMTranslator::VMTranslator(std::string inputPath)
 {
     path = std::filesystem::path(inputPath);
-    codeWriter = new CodeWriter(path);
 }
 
 void VMTranslator::start()
 {
     if (path.has_extension())
     {
-        translateFile(path);
+        codeWriter = new CodeWriter(path.parent_path().string() + "/" + path.stem().string());
+        translateFile(std::filesystem::path(path));
     }
     else
     {
+        codeWriter = new CodeWriter(path);
         for (const auto &fileName : std::filesystem::directory_iterator(path))
         {
             if (fileName.path().extension() == ".vm")
