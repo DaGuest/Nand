@@ -2,9 +2,9 @@
 
 Parser::Parser() {};
 
-Parser::Parser(std::string fileName)
+Parser::Parser(std::string inputPath)
 {
-    inputFile.open(fileName);
+    inputFile.open(inputPath);
 }
 
 void Parser::close()
