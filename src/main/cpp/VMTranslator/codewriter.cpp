@@ -121,7 +121,7 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
 {
     writeOutputLine("// CALL command");
     // Push return address onto stack
-    std::string returnLabel = inputFileName + functionName + "$ret." + std::to_string(returnIndex++);
+    std::string returnLabel = inputFileName + "." + functionName + "$ret." + std::to_string(returnIndex++);
     writeOutputLine("@" + returnLabel);
     writeOutputLine("D=A");
     writeFinalPushCommand();
@@ -155,7 +155,7 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
 void CodeWriter::writeFunction(std::string functionName, int nVars)
 {
     writeOutputLine("// FUNCTION command");
-    writeLabel(inputFileName + functionName);
+    writeLabel(inputFileName + "." + functionName);
     // push n local vars onto stack with value 0
     for (int i = 0; i < nVars; i++)
     {

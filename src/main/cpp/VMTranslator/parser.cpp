@@ -36,52 +36,45 @@ void Parser::advance()
 
 Parser::CommandType Parser::commandType()
 {
-    if (splitCommands.size() > 1)
+    if (splitCommands.front() == "push")
     {
-        if (splitCommands.front() == "push")
-        {
-            return Parser::C_PUSH;
-        }
-        else if (splitCommands.front() == "goto")
-        {
-            return Parser::C_GOTO;
-        }
-        else if (splitCommands.front() == "if-goto")
-        {
-            return Parser::C_IF;
-        }
-        else if (splitCommands.front() == "label")
-        {
-            return Parser::C_LABEL;
-        }
-        else if (splitCommands.front() == "call")
-        {
-            return Parser::C_CALL;
-        }
-        else if (splitCommands.front() == "function")
-        {
-            return Parser::C_FUNCTION;
-        }
-        else if (splitCommands.front() == "pop")
-        {
-            return Parser::C_POP;
-        }
-        else
-        {
-            return Parser::C_NONE;
-        }
+        return Parser::C_PUSH;
     }
-    // Else: arithmetic command
+    else if (splitCommands.front() == "goto")
+    {
+        return Parser::C_GOTO;
+    }
+    else if (splitCommands.front() == "if-goto")
+    {
+        return Parser::C_IF;
+    }
+    else if (splitCommands.front() == "label")
+    {
+        return Parser::C_LABEL;
+    }
+    else if (splitCommands.front() == "call")
+    {
+        return Parser::C_CALL;
+    }
+    else if (splitCommands.front() == "function")
+    {
+        return Parser::C_FUNCTION;
+    }
+    else if (splitCommands.front() == "pop")
+    {
+        return Parser::C_POP;
+    }
+    else if (splitCommands.front() == "return")
+    {
+        return Parser::C_RETURN;
+    }
+    else if (splitCommands.front().size() < 4)
+    {
+        return Parser::C_ARITHMETIC;
+    }
     else
     {
-        if (splitCommands.front() == "return")
-        {
-            return Parser::C_RETURN;
-        }
-        else
-        {
-            return Parser::C_ARITHMETIC;
-        }
+        return Parser::C_NONE;
     }
 }
 
