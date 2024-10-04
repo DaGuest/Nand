@@ -4,11 +4,8 @@ CodeWriter::CodeWriter() {};
 
 CodeWriter::CodeWriter(std::string inputPath)
 {
-    inputPath.erase(inputPath.find_last_of(".") + 1, 2);
-    inputFileName = getFileName(inputPath);
-    outputFile.open(inputPath + "asm");
-    labelIndex = 1;
-    returnIndex = 1;
+    path = inputPath;
+    outputFile.open(path + ".asm");
 }
 
 void CodeWriter::writeArithmetic(std::string command)
@@ -124,7 +121,7 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
 {
     writeOutputLine("// CALL command");
     // Push return address onto stack
-    std::string returnLabel = inputFileName + functionName + "$ret." + std::to_string(returnIndex++);
+    std::string returnLabel = inputFileName + "." + functionName + "$ret." + std::to_string(returnIndex++);
     writeOutputLine("@" + returnLabel);
     writeOutputLine("D=A");
     writeFinalPushCommand();
@@ -158,7 +155,7 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
 void CodeWriter::writeFunction(std::string functionName, int nVars)
 {
     writeOutputLine("// FUNCTION command");
-    writeLabel(inputFileName + functionName);
+    writeLabel(inputFileName + "." + functionName);
     // push n local vars onto stack with value 0
     for (int i = 0; i < nVars; i++)
     {
@@ -198,6 +195,8 @@ void CodeWriter::writeReturn()
 
 void CodeWriter::setFileName(std::string fileName)
 {
+    labelIndex = 1;
+    returnIndex = 1;
     inputFileName = fileName;
 }
 
@@ -311,12 +310,4 @@ void CodeWriter::writeReplaceCommand(std::string label, int steps)
     writeOutputLine("D=M");
     writeOutputLine("@" + label);
     writeOutputLine("M=D");
-}
-
-std::string CodeWriter::getFileName(std::string path)
-{
-    size_t startPos = path.find_last_of("/") + 1;
-    size_t endPos = path.find_last_of(".") + 1;
-    path.erase(endPos, 2);
-    return path.substr(startPos);
 }

@@ -71,6 +71,7 @@ public:
     void writeLabel(std::string label);
 
 private:
+    std::string path;
     std::string inputFileName;
     std::ofstream outputFile;
     int labelIndex;
@@ -116,11 +117,4 @@ private:
      * @param steps The numbers of steps to take back from endFrame.
      */
     void writeReplaceCommand(std::string label, int steps);
-
-    /**
-     * A helper function that retrieves the stem filename from the given path.
-     * @param path The file path in string format.
-     * @return The filename stem with a '.' at the end.
-     */
-    std::string getFileName(std::string path);
 };

@@ -2,22 +2,32 @@
 #include <string>
 #include "parser.h"
 #include "codewriter.h"
+#include <vector>
+#include <filesystem>
 
 class VMTranslator
 {
 public:
     VMTranslator();
+
     /**
      * Intitializes a parser and codeWriter object.
      */
-    VMTranslator(std::string outputFileName);
+    VMTranslator(std::string inputPath);
+
     /**
-     * Advances the parser until the EOF.
-     * Separates Arithmetic, Pop and Push commands from each other.
+     * Checks for directory or filename.
+     * Translates all .vm files given.
      */
     void start();
+
+    /**
+     * Translates a .vm file into assembly code
+     */
+    void translateFile(std::filesystem::path path);
 
 private:
     Parser *parser;
     CodeWriter *codeWriter;
+    std::filesystem::path path;
 };

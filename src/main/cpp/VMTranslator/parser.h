@@ -28,9 +28,9 @@ public:
 
     /**
      * A parser that handles .vm files line by line.
-     * @param fileName path to the filename of the xyz.vm file.
+     * @param inputPath path to the filename of the xyz.vm file.
      */
-    Parser(std::string fileName);
+    Parser(std::string inputPath);
 
     /**
      * Checks if there are more lines to be parsed.

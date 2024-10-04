@@ -2,14 +2,36 @@
 
 VMTranslator::VMTranslator() {}
 
-VMTranslator::VMTranslator(std::string inputFileName)
+VMTranslator::VMTranslator(std::string inputPath)
 {
-    parser = new Parser(inputFileName);
-    codeWriter = new CodeWriter(inputFileName);
+    path = std::filesystem::path(inputPath);
 }
 
 void VMTranslator::start()
 {
+    if (path.has_extension())
+    {
+        codeWriter = new CodeWriter(path.parent_path().string() + "/" + path.stem().string());
+        translateFile(std::filesystem::path(path));
+    }
+    else
+    {
+        codeWriter = new CodeWriter(path);
+        for (const auto &fileName : std::filesystem::directory_iterator(path))
+        {
+            if (fileName.path().extension() == ".vm")
+            {
+                translateFile(fileName.path());
+            }
+        }
+    }
+}
+
+void VMTranslator::translateFile(std::filesystem::path path)
+{
+    parser = new Parser(path);
+    codeWriter->setFileName(path.stem());
+
     while (parser->hasMoreLines())
     {
         parser->advance();
