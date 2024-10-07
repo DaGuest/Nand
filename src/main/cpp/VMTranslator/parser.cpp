@@ -20,6 +20,7 @@ bool Parser::hasMoreLines()
 void Parser::advance()
 {
     getline(inputFile, currentCommand);
+    currentCommand = stripFront(currentCommand);
     while (!checkLine())
     {
         if (!hasMoreLines())
@@ -29,6 +30,7 @@ void Parser::advance()
         else
         {
             getline(inputFile, currentCommand);
+            currentCommand = stripFront(currentCommand);
         }
     }
     splitString(currentCommand);
@@ -84,6 +86,10 @@ std::string Parser::arg1()
     {
         return splitCommands.front();
     }
+    else if (commandType() == Parser::C_FUNCTION)
+    {
+        return splitCommands.at(1).substr(splitCommands.at(1).find_first_of(".") + 1);
+    }
     else
     {
         return splitCommands.at(1);
@@ -95,11 +101,16 @@ int Parser::arg2()
     return std::stoi(splitCommands.at(2));
 }
 
+std::string Parser::stripFront(std::string stringToStrip)
+{
+    size_t pos = stringToStrip.find_first_not_of(" \t");
+    return stringToStrip.erase(0, pos);
+}
+
 void Parser::splitString(std::string stringToSplit)
 {
     splitCommands.clear();
-    size_t pos = stringToSplit.find_first_not_of(" \t");
-    stringToSplit.erase(0, pos);
+    size_t pos = 0;
     std::string command;
     while ((pos = stringToSplit.find(" ")) != std::string::npos)
     {

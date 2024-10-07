@@ -59,7 +59,8 @@ void CodeWriter::writeArithmetic(std::string command)
 
 void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segment, int index, bool addrOnly)
 {
-    writeOutputLine("// " + std::to_string(commandType) + " " + segment + " " + std::to_string(index));
+    std::string commentTitle = commandType == Parser::C_PUSH ? "PUSH" : "POP";
+    writeOutputLine("// " + commentTitle + " " + segment + " " + std::to_string(index));
     if (commandType == Parser::C_POP)
     {
         if (segment == "pointer" || segment == "static")
@@ -103,7 +104,7 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
 void CodeWriter::writeGoto(std::string gotoLabel)
 {
     writeOutputLine("// GOTO command");
-    writeOutputLine("@" + gotoLabel);
+    writeOutputLine("@" + inputFileName + "." + scopeName + "$" + gotoLabel);
     writeOutputLine("0;JMP");
 }
 
@@ -113,7 +114,7 @@ void CodeWriter::writeIf(std::string gotoLabel)
     writeOutputLine("@SP");
     writeOutputLine("AM=M-1");
     writeOutputLine("D=M");
-    writeOutputLine("@" + gotoLabel);
+    writeOutputLine("@" + inputFileName + "." + scopeName + "$" + gotoLabel);
     writeOutputLine("D;JNE");
 }
 
@@ -121,7 +122,7 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
 {
     writeOutputLine("// CALL command");
     // Push return address onto stack
-    std::string returnLabel = inputFileName + "." + functionName + "$ret." + std::to_string(returnIndex++);
+    std::string returnLabel = inputFileName + "." + scopeName + "$ret." + std::to_string(returnIndex++);
     writeOutputLine("@" + returnLabel);
     writeOutputLine("D=A");
     writeFinalPushCommand();
@@ -147,15 +148,17 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
     writeOutputLine("@LCL");
     writeOutputLine("M=D");
     // Goto functionname
-    writeGoto(inputFileName + "." + functionName);
+    writeOutputLine("@" + functionName);
+    writeOutputLine("0;JMP");
     // Inject returnAddress label
-    writeLabel(returnLabel);
+    writeOutputLine("(" + returnLabel + ")");
 }
 
 void CodeWriter::writeFunction(std::string functionName, int nVars)
 {
+    scopeName = functionName;
     writeOutputLine("// FUNCTION command");
-    writeLabel(inputFileName + "." + functionName);
+    writeOutputLine("(" + inputFileName + "." + scopeName + ")");
     // push n local vars onto stack with value 0
     for (int i = 0; i < nVars; i++)
     {
@@ -193,6 +196,19 @@ void CodeWriter::writeReturn()
     writeOutputLine("0;JMP");
 }
 
+void CodeWriter::writeBootStrap()
+{
+    writeOutputLine("// BOOTSTRAP");
+    // Set SP to 256
+    writeOutputLine("@256");
+    writeOutputLine("D=A");
+    writeOutputLine("@0");
+    writeOutputLine("M=D");
+    // Call Sys.init
+    writeOutputLine("@Sys.init");
+    writeOutputLine("0;JMP");
+}
+
 void CodeWriter::setFileName(std::string fileName)
 {
     labelIndex = 1;
@@ -207,7 +223,7 @@ void CodeWriter::close()
 
 void CodeWriter::writeLabel(std::string label)
 {
-    outputFile << "(" << label << ")" << std::endl;
+    writeOutputLine("(" + inputFileName + "." + scopeName + "$" + label + ")");
 }
 
 void CodeWriter::writeOutputLine(std::string command)
@@ -227,7 +243,7 @@ void CodeWriter::writeEQGTLTCommand(std::string commandLabel)
     writeOutputLine("@SP");
     writeOutputLine("A=M");
     writeOutputLine("M=0");
-    writeOutputLine(commandLabel + std::to_string(labelIndex));
+    writeOutputLine("(" + commandLabel + std::to_string(labelIndex) + ")");
     labelIndex++;
     writeOutputLine("@SP");
     writeOutputLine("M=M+1");
@@ -257,7 +273,7 @@ std::string CodeWriter::getSegmentPointer(std::string segmentLabel, int index)
     }
     else if (segmentLabel == "static")
     {
-        return inputFileName + std::to_string(index);
+        return inputFileName + "." + std::to_string(index);
     }
     else if (segmentLabel == "pointer")
     {

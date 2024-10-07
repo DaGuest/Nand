@@ -56,6 +56,11 @@ public:
     void writeReturn();
 
     /**
+     * Sets the SP address and calls Sys.init
+     */
+    void writeBootStrap();
+
+    /**
      * Sets the current fileName of the .vm file that is being translated.
      * @param fileName The stem of the fileName to be used (without extensions or path chars)
      */
@@ -75,6 +80,7 @@ private:
     std::string path;
     std::string inputFileName;
     std::ofstream outputFile;
+    std::string scopeName;
     int labelIndex;
     int returnIndex;
 

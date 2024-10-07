@@ -72,6 +72,13 @@ private:
     std::ifstream inputFile;
     std::string currentCommand;
     std::vector<std::string> splitCommands;
+
+    /**
+     * Strips and TAB or space characters from the front of a string.
+     * @return The stripped string
+     */
+    std::string stripFront(std::string stringToStrip);
+
     /**
      * Splits string on whitespace character.
      * The individual string are saved in splitCommands
