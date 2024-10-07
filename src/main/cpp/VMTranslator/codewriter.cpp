@@ -57,7 +57,7 @@ void CodeWriter::writeArithmetic(std::string command)
     }
 }
 
-void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segment, int index)
+void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segment, int index, bool addrOnly)
 {
     writeOutputLine("// " + std::to_string(commandType) + " " + segment + " " + std::to_string(index));
     if (commandType == Parser::C_POP)
@@ -93,7 +93,7 @@ void CodeWriter::writePushPop(Parser::CommandType commandType, std::string segme
                 writeOutputLine("D=M");
                 writeOutputLine("@" + std::to_string(index));
                 writeOutputLine("A=D+A");
-                writeOutputLine("D=M");
+                addrOnly ? writeOutputLine("D=A") : writeOutputLine("D=M");
             }
         }
         writeFinalPushCommand();
@@ -126,10 +126,10 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
     writeOutputLine("D=A");
     writeFinalPushCommand();
     // Push lcl, arg, this and that onto stack
-    writePushPop(Parser::C_PUSH, "local", 0);
-    writePushPop(Parser::C_PUSH, "argument", 0);
-    writePushPop(Parser::C_PUSH, "this", 0);
-    writePushPop(Parser::C_PUSH, "that", 0);
+    writePushPop(Parser::C_PUSH, "local", 0, true);
+    writePushPop(Parser::C_PUSH, "argument", 0, true);
+    writePushPop(Parser::C_PUSH, "this", 0, true);
+    writePushPop(Parser::C_PUSH, "that", 0, true);
     // Reposition ARG
     writeOutputLine("// Reposition ARG");
     writeOutputLine("@SP");
@@ -147,7 +147,7 @@ void CodeWriter::writeCall(std::string functionName, int nArgs)
     writeOutputLine("@LCL");
     writeOutputLine("M=D");
     // Goto functionname
-    writeGoto(inputFileName + functionName);
+    writeGoto(inputFileName + "." + functionName);
     // Inject returnAddress label
     writeLabel(returnLabel);
 }

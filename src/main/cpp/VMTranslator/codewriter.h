@@ -26,8 +26,9 @@ public:
      * @param command Either C_PUSH or C_POP
      * @param segment String representation of the segment where to Push of Pop from, e.g. local, constant
      * @param index Specifies the index to pop from or push to.
+     * @param addrOnly if true it pushes the address of the segment iso the value.
      */
-    void writePushPop(Parser::CommandType commandType, std::string segment, int index);
+    void writePushPop(Parser::CommandType commandType, std::string segment, int index, bool addrOnly = false);
 
     /**
      * Writes to the output file the assembly code that implements the given goto command.
