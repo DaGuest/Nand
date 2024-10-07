@@ -205,8 +205,7 @@ void CodeWriter::writeBootStrap()
     writeOutputLine("@0");
     writeOutputLine("M=D");
     // Call Sys.init
-    writeOutputLine("@Sys.init");
-    writeOutputLine("0;JMP");
+    writeCall(inputFileName + ".init", 0);
 }
 
 void CodeWriter::setFileName(std::string fileName)

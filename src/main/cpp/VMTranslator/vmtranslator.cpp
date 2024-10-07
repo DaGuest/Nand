@@ -16,7 +16,7 @@ void VMTranslator::start()
     }
     else
     {
-        codeWriter = new CodeWriter(path);
+        codeWriter = new CodeWriter(path.string() + "/" + path.filename().string());
         if (std::filesystem::exists(path.append("Sys.vm")))
         {
             codeWriter->setFileName(path.stem());

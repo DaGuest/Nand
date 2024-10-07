@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <filesystem>
 #include <algorithm>
 #include "parser.h"
 
@@ -48,7 +47,7 @@ public:
     /**
      * Writes the assembly code for the FUNCTION command.
      */
-    void writeFunction(std::string funtionName, int nVars);
+    void writeFunction(std::string functionName, int nVars);
 
     /**
      * Writes the assembly code for the RETURN command.
