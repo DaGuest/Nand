@@ -1,10 +1,12 @@
 /** Implements the Dodge game */
 class DodgeGame {
     field Background background;
+    field int counter;
 
     /** Constructs a new DodgeGame. */
     constructor DodgeGame new() {
-        let background = Background new();
+        let background = Background.new();
+        let counter = 31;
         return this;
     }
 
@@ -17,6 +19,24 @@ class DodgeGame {
 
     /** Starts running the game loop. */
     method void run() {
-        do background.scroll();
+        var char key;
+        var boolean exit;
+        let exit = false;
+        let counter = 31;
+
+        while (~exit) {
+            do background.scroll(counter);  
+            let counter = counter - 1;
+            if (counter = -1) {
+                let counter = 31;
+            }
+
+            let key = Keyboard.keyPressed();
+            if (key = 113) {
+                let exit = true;
+            }
+            do Sys.wait(1);
+        }
+        return;
     }
 }
