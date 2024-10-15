@@ -1,0 +1,22 @@
+/** Implements the Dodge game */
+class DodgeGame {
+    field Background background;
+
+    /** Constructs a new DodgeGame. */
+    constructor DodgeGame new() {
+        let background = Background new();
+        return this;
+    }
+
+    /** Disposes this class */
+    method void dispose() {
+        do background.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Starts running the game loop. */
+    method void run() {
+        do background.scroll();
+    }
+}

@@ -1,0 +1,54 @@
+class Background {
+    field int counter;
+    field int squareSize;
+
+    /** Constructs a new Background class  that takes care of the scrolling background. */
+    constructor Background new() {
+        let counter = 0;
+        let squareSize = 16;
+        return this;
+    }
+
+    /** Disposes this class */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Scrolls the background to the left of the screen */
+    method void scroll() {
+        var char key;
+        var boolean exit;
+        let exit = false;
+
+        while (~exit) {
+            do eraseWallLine(counter * 16);
+            let counter = counter - 1;
+            if (counter = -1) {
+                let counter = 31;
+            }
+
+            let key = Keyboard.keyPressed();
+            if (key = 81) {
+                let exit = true;
+            }
+            
+            do drawWallLine(counter * 16);
+            do Sys.wait(5);    
+        }
+    }
+
+    /** Draw a piece of the scrolling wall. */
+    method void drawWallLine(int startPos) {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(startPos, 0, startPos + squareSize, squareSize);
+        return;
+    }
+
+    /** Erase a piece of the scrolling wall. */
+    method void eraseWallLine(int startPos) {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(startPos, 0, startPos + squareSize, squareSize);
+        return;
+    }
+}
