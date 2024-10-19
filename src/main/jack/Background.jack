@@ -1,80 +1,75 @@
 class Background {
     field int squareSize;
-    field Array holedWalls;
+    field Array gapWalls;
+    field Array gapStartPositions;
 
     /** Constructs a new Background class  that takes care of the scrolling background. */
     constructor Background new() {
         let squareSize = 16;
-        let holedWalls = Array.new(2);
+        let gapWalls = Array.new(3);
+        let gapStartPositions = Array.new(3);
+        do initializeWalls();
         return this;
     }
 
     /** Disposes this class */
     method void dispose() {
-        do holedWalls.dispose();
+        do gapWalls.dispose();
+        do gapStartPositions.dispose();
         do Memory.deAlloc(this);
         return;
     }
 
+    /** Loads the arrays with the initial values */
+    method void initializeWalls() {
+        let gapWalls[0] = 10;
+        let gapWalls[1] = 20;
+        let gapWalls[2] = 30;
+        let gapStartPositions[0] = 5;
+        let gapStartPositions[1] = 9;
+        let gapStartPositions[2] = 3;
+        return;
+    }
+
     /** Scrolls the background to the left of the screen */
-    method void scroll(int counter) {
-        var int i;
-        var int gapSize;
-        let i = 31;
+    method void scroll() {
+        var int arrayCounter;
+        var int gapStartPos;
 
-        while (~(i = -1)) {
-            if (i = counter) {
-                let gapSize = 5;
-            }
-            else {
-                let gapSize = -1;
-            }
-            do drawWallLine(i, gapSize, false);
-            let i = i - 1; 
-        }
+        let arrayCounter = 3;
 
-        let counter = Background.reduceValue(counter);
-        let i = 31;
-
-        while (~(i = -1)) {
-            if (i = counter) {
-                let gapSize = 5;
-            }
-            else {
-                let gapSize = -1;
-            }
-            do drawWallLine(i, gapSize, true);
-            let i = i - 1; 
+        // Iterate through arrays
+        while (~(arrayCounter = 0)) {
+            let arrayCounter = arrayCounter - 1;
+            do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], false);
+            let gapWalls[arrayCounter] = Background.reduceValue(gapWalls[arrayCounter]);
+            do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], true);
         }
         return;
     }
 
     /** Draw a piece of the scrolling wall. */
-    method void drawWallLine(int startPos, int holeStartPos, boolean color) {
+    method void drawWallLine(int startPos, int gapStartPos, boolean color) {
         var int i;
         var int gapSize;
         var int startPosX;
         var int startPosY;
 
-        let i = 1;
+        let i = 0;
         let gapSize = 5;
         let startPosX = startPos * 16;
     
         do Screen.setColor(color);
-        do Screen.drawRectangle(startPosX, 0, startPosX + squareSize, squareSize);
-        do Screen.drawRectangle(startPosX, 239, startPosX + squareSize, 239 + squareSize);
 
-        if (~(holeStartPos = -1)) {
-            while (~(i = 16)) {
-                if (i = holeStartPos) {
-                    // A gap in the wall is created
-                    let i = i + gapSize;
-                }
-                let startPosY = i * 16;
-
-                do Screen.drawRectangle(startPosX, startPosY, startPosX + squareSize, startPosY + squareSize);
-                let i = i + 1;
+        while (~(i = 16)) {
+            if (i = gapStartPos) {
+                // A gap in the wall is created
+                let i = i + gapSize;
             }
+            let startPosY = i * 16;
+
+            do Screen.drawRectangle(startPosX, startPosY, startPosX + squareSize, startPosY + squareSize);
+            let i = i + 1;
         }
         return;
     }
