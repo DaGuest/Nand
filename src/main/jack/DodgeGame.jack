@@ -35,7 +35,7 @@ class DodgeGame {
             if (key = 113) {
                 let exit = true;
             }
-            do Sys.wait(1);
+            do Sys.wait(50);
         }
         return;
     }

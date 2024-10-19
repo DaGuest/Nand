@@ -1,33 +1,81 @@
 class Background {
     field int squareSize;
+    field Array holedWalls;
 
     /** Constructs a new Background class  that takes care of the scrolling background. */
     constructor Background new() {
         let squareSize = 16;
+        let holedWalls = Array.new(2);
         return this;
     }
 
     /** Disposes this class */
     method void dispose() {
+        do holedWalls.dispose();
         do Memory.deAlloc(this);
         return;
     }
 
     /** Scrolls the background to the left of the screen */
     method void scroll(int counter) {
-        do eraseWallLine(counter * 16);
-        let counter = counter - 1;
-        if (counter = -1) {
-            let counter = 31;
+        var int i;
+        var int gapSize;
+        let i = 31;
+
+        while (~(i = -1)) {
+            if (i = counter) {
+                let gapSize = 5;
+            }
+            else {
+                let gapSize = -1;
+            }
+            do drawWallLine(i, gapSize, false);
+            let i = i - 1; 
         }
-        do drawWallLine(counter * 16);   
+
+        let counter = Background.reduceValue(counter);
+        let i = 31;
+
+        while (~(i = -1)) {
+            if (i = counter) {
+                let gapSize = 5;
+            }
+            else {
+                let gapSize = -1;
+            }
+            do drawWallLine(i, gapSize, true);
+            let i = i - 1; 
+        }
         return;
     }
 
     /** Draw a piece of the scrolling wall. */
-    method void drawWallLine(int startPos) {
-        do Screen.setColor(true);
-        do Screen.drawRectangle(startPos, 0, startPos + squareSize, squareSize);
+    method void drawWallLine(int startPos, int holeStartPos, boolean color) {
+        var int i;
+        var int gapSize;
+        var int startPosX;
+        var int startPosY;
+
+        let i = 1;
+        let gapSize = 5;
+        let startPosX = startPos * 16;
+    
+        do Screen.setColor(color);
+        do Screen.drawRectangle(startPosX, 0, startPosX + squareSize, squareSize);
+        do Screen.drawRectangle(startPosX, 239, startPosX + squareSize, 239 + squareSize);
+
+        if (~(holeStartPos = -1)) {
+            while (~(i = 16)) {
+                if (i = holeStartPos) {
+                    // A gap in the wall is created
+                    let i = i + gapSize;
+                }
+                let startPosY = i * 16;
+
+                do Screen.drawRectangle(startPosX, startPosY, startPosX + squareSize, startPosY + squareSize);
+                let i = i + 1;
+            }
+        }
         return;
     }
 
@@ -36,5 +84,14 @@ class Background {
         do Screen.setColor(false);
         do Screen.drawRectangle(startPos, 0, startPos + squareSize, squareSize);
         return;
+    }
+
+    /** Helper function to reduce specific value */
+    function int reduceValue(int value) {
+        let value = value - 1;
+        if (value = -1) {
+            let value = 31;
+        }
+        return value;
     }
 }
