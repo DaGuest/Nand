@@ -3,7 +3,7 @@ class Background {
     field Array gapWalls;
     field Array gapStartPositions;
 
-    /** Constructs a new Background class  that takes care of the scrolling background. */
+    /** Constructs a new Background object that takes care of the scrolling background. */
     constructor Background new() {
         let squareSize = 16;
         let gapWalls = Array.new(3);
@@ -12,7 +12,7 @@ class Background {
         return this;
     }
 
-    /** Disposes this class */
+    /** Disposes this Background object */
     method void dispose() {
         do gapWalls.dispose();
         do gapStartPositions.dispose();
