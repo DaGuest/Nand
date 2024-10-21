@@ -25,12 +25,24 @@ class DodgeGame {
         let exit = false;
 
         while (~exit) {
-            do background.scroll();
             do player.draw();
+            do background.scroll();
             
             let key = Keyboard.keyPressed();
             if (key = 113) {
                 let exit = true;
+            }
+            else {
+                // UP-arrow key pressed
+                if (key = 131) {
+                    do player.move(true);
+                }
+                else {
+                    // DOWN-arrow key pressed
+                    if (key = 133) {
+                        do player.move(false);
+                    }
+                }
             }
             do Sys.wait(50);
         }

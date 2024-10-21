@@ -1,11 +1,13 @@
 class Player {
     field int positionX;
     field int positionY;
+    field int lastPositionY;
 
     /** Constructs a new Player object that can move the player over the screen vertically */
     constructor Player new() {
-        let positionX = 2;
-        let positionY = 8;
+        let positionX = 2 * 16;
+        let positionY = (7 * 16) + 8;
+        let lastPositionY = (7 * 16) + 8;
         return this;
     }
 
@@ -17,8 +19,27 @@ class Player {
 
     /** Draws the player on the screen at it's current position */
     method void draw() {
+        do Screen.setColor(false);
+        do Screen.drawCircle(positionX, lastPositionY, 8);
         do Screen.setColor(true);
-        do Screen.drawCircle(positionX * 16, positionY * 16, 16);
+        do Screen.drawCircle(positionX, positionY, 8);
+        return;
+    }
+
+    /** Move player up or down 1 step */
+    method void move(boolean up) {
+        if (up) {
+            if (positionY > 16) {
+                let lastPositionY = positionY;
+                let positionY = positionY - 16;
+            }
+        }
+        else {
+            if (positionY < 240) {
+                let lastPositionY = positionY;
+                let positionY = positionY + 16;
+            }
+        }
         return;
     }
 }
