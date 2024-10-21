@@ -1,16 +1,19 @@
 /** Implements the Dodge game */
 class DodgeGame {
     field Background background;
+    field Player player;
 
     /** Constructs a new DodgeGame. */
     constructor DodgeGame new() {
         let background = Background.new();
+        let player = player.new();
         return this;
     }
 
     /** Disposes this class */
     method void dispose() {
         do background.dispose();
+        do player.dispose();
         do Memory.deAlloc(this);
         return;
     }
@@ -22,7 +25,8 @@ class DodgeGame {
         let exit = false;
 
         while (~exit) {
-            do background.scroll();  
+            do background.scroll();
+            do player.draw();
             
             let key = Keyboard.keyPressed();
             if (key = 113) {
