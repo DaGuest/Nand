@@ -81,6 +81,14 @@ class Background {
         return;
     }
 
+    /** Reduces the gapSize */
+    method void reduceGapSize() {
+        if (gapSize > 1) {
+            let gapSize = gapSize - 1;
+        }
+        return;
+    }
+
     /** Checks if there is a collision of a wall with the player that frame */
     method boolean checkCollision(int playerPositionY) {
         var int arrayCounter;

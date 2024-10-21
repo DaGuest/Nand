@@ -21,10 +21,18 @@ class DodgeGame {
     /** Starts running the game loop. */
     method void run() {
         var char key;
+        var int difficultyTimer; 
         var boolean exit;
+
         let exit = false;
+        let difficultyTimer = 64;
 
         while (~exit) {
+            let difficultyTimer = difficultyTimer - 1;
+            if (difficultyTimer = 0) {
+                do background.reduceGapSize();
+                let difficultyTimer = 64;
+            }
             let exit = background.checkCollision(player.getPositionY());
             do player.draw();
             do background.scroll();
