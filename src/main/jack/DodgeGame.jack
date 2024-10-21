@@ -1,0 +1,35 @@
+/** Implements the Dodge game */
+class DodgeGame {
+    field Background background;
+
+    /** Constructs a new DodgeGame. */
+    constructor DodgeGame new() {
+        let background = Background.new();
+        return this;
+    }
+
+    /** Disposes this class */
+    method void dispose() {
+        do background.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Starts running the game loop. */
+    method void run() {
+        var char key;
+        var boolean exit;
+        let exit = false;
+
+        while (~exit) {
+            do background.scroll();  
+            
+            let key = Keyboard.keyPressed();
+            if (key = 113) {
+                let exit = true;
+            }
+            do Sys.wait(50);
+        }
+        return;
+    }
+}

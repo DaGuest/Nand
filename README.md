@@ -1,6 +1,6 @@
 #  Nand to Tetris implementations
 
-This is my implementation of project 6,7 and 8 in the course Nand to Tetris part 2.
+This is my implementation of project 6,7,8 and 9 in the course Nand to Tetris part 2.
 
 ## Objective project 6
 The object was to build an assembly program that can translate Hack assembly code into machine code.
@@ -24,3 +24,8 @@ The VMTranslator can be compiled using clang++ (version 16.0).
 The object was to build the second implementation of the VMTranslator that is able to translate VM code into assembly code.
 The second implementation involves branching and function commands.
 The implementation was made using C++.
+
+## Objective project 9
+The object was to build a game written in the Jack language.
+I chose a game that forces the player to dodge scrolling walls by moving the players-icon up or down.
+The implementation was made using the Nand Jack language.

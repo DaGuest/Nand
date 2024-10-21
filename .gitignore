@@ -48,3 +48,9 @@ replay_pid*
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# JACK rules
+# -------- #
+
+/src/main/jack/*
+!*.jack
