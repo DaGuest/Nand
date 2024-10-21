@@ -25,6 +25,7 @@ class DodgeGame {
         let exit = false;
 
         while (~exit) {
+            let exit = background.checkCollision(player.getPositionY());
             do player.draw();
             do background.scroll();
             
@@ -46,6 +47,7 @@ class DodgeGame {
             }
             do Sys.wait(50);
         }
+        do player.drawWhite();
         return;
     }
 }

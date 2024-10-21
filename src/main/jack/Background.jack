@@ -1,11 +1,13 @@
 class Background {
     field int squareSize;
+    field int gapSize;
     field Array gapWalls;
     field Array gapStartPositions;
 
     /** Constructs a new Background object that takes care of the scrolling background. */
     constructor Background new() {
         let squareSize = 16;
+        let gapSize = 5;
         let gapWalls = Array.new(3);
         let gapStartPositions = Array.new(3);
         do initializeWalls();
@@ -51,12 +53,10 @@ class Background {
     /** Draw a piece of the scrolling wall. */
     method void drawWallLine(int startPos, int gapStartPos, boolean color) {
         var int i;
-        var int gapSize;
         var int startPosX;
         var int startPosY;
 
         let i = 0;
-        let gapSize = 5;
         let startPosX = startPos * 16;
     
         do Screen.setColor(color);
@@ -79,6 +79,31 @@ class Background {
         do Screen.setColor(false);
         do Screen.drawRectangle(startPos, 0, startPos + squareSize, squareSize);
         return;
+    }
+
+    /** Checks if there is a collision of a wall with the player that frame */
+    method boolean checkCollision(int playerPositionY) {
+        var int arrayCounter;
+        var int checker;
+
+        let arrayCounter = 3;
+        
+        // Iterate through arrays
+        while (~(arrayCounter = 0)) {
+            let arrayCounter = arrayCounter - 1;
+            if (gapWalls[arrayCounter] = 2) {
+                let checker = playerPositionY - gapStartPositions[arrayCounter];
+                if (checker < 0) {
+                    return true;
+                }
+                else {
+                    if (checker > (gapSize - 1)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /** Helper function to reduce specific value */
