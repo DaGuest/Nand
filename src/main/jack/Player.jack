@@ -7,4 +7,15 @@ class Player {
         let positionX = 2;
         let positionY = 15;
     }
+
+    /** Disposes this Player object */
+    method void dispose() {
+        do Memory.deAlloc(this);
+    }
+
+    /** Draws the player on the screen at it's current position */
+    method void drawPlayer() {
+        do Screen.setColor(true);
+        do Screen.drawCirle(positionX, positionY, 16);
+    }
 }
