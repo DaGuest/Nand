@@ -5,17 +5,20 @@ class Player {
     /** Constructs a new Player object that can move the player over the screen vertically */
     constructor Player new() {
         let positionX = 2;
-        let positionY = 15;
+        let positionY = 8;
+        return this;
     }
 
     /** Disposes this Player object */
     method void dispose() {
         do Memory.deAlloc(this);
+        return;
     }
 
     /** Draws the player on the screen at it's current position */
-    method void drawPlayer() {
+    method void draw() {
         do Screen.setColor(true);
-        do Screen.drawCirle(positionX, positionY, 16);
+        do Screen.drawCircle(positionX * 16, positionY * 16, 16);
+        return;
     }
 }

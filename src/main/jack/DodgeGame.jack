@@ -6,7 +6,7 @@ class DodgeGame {
     /** Constructs a new DodgeGame. */
     constructor DodgeGame new() {
         let background = Background.new();
-        let player = player.new();
+        let player = Player.new();
         return this;
     }
 
