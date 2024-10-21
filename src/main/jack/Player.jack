@@ -1,0 +1,56 @@
+class Player {
+    field int positionX;
+    field int positionY;
+    field int lastPositionY;
+
+    /** Constructs a new Player object that can move the player over the screen vertically */
+    constructor Player new() {
+        let positionX = (2 * 16) - 8;
+        let positionY = 7;
+        let lastPositionY = 7;
+        return this;
+    }
+
+    /** Disposes this Player object */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Draws the player on the screen at it's current position */
+    method void draw() {
+        do Screen.setColor(false);
+        do Screen.drawCircle(positionX, (lastPositionY * 16) + 8, 8);
+        do Screen.setColor(true);
+        do Screen.drawCircle(positionX, (positionY * 16) + 8, 8);
+        return;
+    }
+
+    /** Draws player in white to display where he died */
+    method void drawWhite() {
+        do Screen.setColor(false);
+        do Screen.drawCircle(positionX, (positionY * 16) + 8, 8);
+        return;
+    }
+
+    /** Move player up or down 1 step */
+    method void move(boolean up) {
+        if (up) {
+            if (positionY > 0) {
+                let lastPositionY = positionY;
+                let positionY = positionY - 1;
+            }
+        }
+        else {
+            if (positionY < 15) {
+                let lastPositionY = positionY;
+                let positionY = positionY + 1;
+            }
+        }
+        return;
+    }
+
+    method int getPositionY() {
+        return positionY;
+    }
+}

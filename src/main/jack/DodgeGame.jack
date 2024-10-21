@@ -1,16 +1,19 @@
 /** Implements the Dodge game */
 class DodgeGame {
     field Background background;
+    field Player player;
 
     /** Constructs a new DodgeGame. */
     constructor DodgeGame new() {
         let background = Background.new();
+        let player = Player.new();
         return this;
     }
 
     /** Disposes this class */
     method void dispose() {
         do background.dispose();
+        do player.dispose();
         do Memory.deAlloc(this);
         return;
     }
@@ -18,18 +21,41 @@ class DodgeGame {
     /** Starts running the game loop. */
     method void run() {
         var char key;
+        var int difficultyTimer; 
         var boolean exit;
+
         let exit = false;
+        let difficultyTimer = 64;
 
         while (~exit) {
-            do background.scroll();  
+            let difficultyTimer = difficultyTimer - 1;
+            if (difficultyTimer = 0) {
+                do background.reduceGapSize();
+                let difficultyTimer = 64;
+            }
+            let exit = background.checkCollision(player.getPositionY());
+            do player.draw();
+            do background.scroll();
             
             let key = Keyboard.keyPressed();
             if (key = 113) {
                 let exit = true;
             }
+            else {
+                // UP-arrow key pressed
+                if (key = 131) {
+                    do player.move(true);
+                }
+                else {
+                    // DOWN-arrow key pressed
+                    if (key = 133) {
+                        do player.move(false);
+                    }
+                }
+            }
             do Sys.wait(50);
         }
+        do player.drawWhite();
         return;
     }
 }
