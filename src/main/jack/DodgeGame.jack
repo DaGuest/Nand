@@ -2,11 +2,13 @@
 class DodgeGame {
     field Background background;
     field Player player;
+    field SplashScreen splashScreen;
 
-    /** Constructs a new DodgeGame. */
+    /** Constructs a new DodgeGame object. */
     constructor DodgeGame new() {
         let background = Background.new();
         let player = Player.new();
+        let splashScreen = SplashScreen.new();
         return this;
     }
 
@@ -23,9 +25,21 @@ class DodgeGame {
         var char key;
         var int difficultyTimer; 
         var boolean exit;
+        var boolean start;
 
         let exit = false;
+        let start = false;
         let difficultyTimer = 64;
+
+        while (~start) {
+            do splashScreen.drawSplashScreen("-- Dodge the walls! --", " ","Use up/down arrow keys.", "To start: hold SPACE!");
+            let key = Keyboard.keyPressed();
+            if (key = 32) {
+                let start = true;
+            }
+            do Sys.wait(50);
+        }
+        do splashScreen.drawBaseRectangle();
 
         while (~exit) {
             let difficultyTimer = difficultyTimer - 1;
@@ -56,6 +70,7 @@ class DodgeGame {
             do Sys.wait(50);
         }
         do player.drawWhite();
+        do splashScreen.drawSplashScreen(" ", "Game Over!", " ", "Again? Please Reload");
         return;
     }
 }
