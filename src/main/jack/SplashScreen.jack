@@ -1,0 +1,70 @@
+class SplashScreen {
+    field int posX;
+    field int posY;
+    field int width;
+    field int length;
+
+    /** Constructs a new SplashScreen object. */
+    constructor SplashScreen new() {
+        let posX = 128;
+        let posY = 64;
+        let width = 256;
+        let length = 128;
+        return this;
+    }
+
+    /** Disposes this class */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Draw a splash screen with the given lines of text */
+    method void drawSplashScreen(String textLine1, String textLine2, String textLine3, String textLine4) {
+        do drawBaseRectangle();
+        do drawBorder();
+        do printText(textLine1, textLine2, textLine3, textLine4);
+        return;
+    }
+
+    /** Draws a basic rectangle of white pixels on the screen. */
+    method void drawBaseRectangle() {
+        // Draw basic white background
+        do Screen.setColor(false);
+        do Screen.drawRectangle(posX - 5, posY - 5, posX + width + 5, posY + length + 5);
+        return;
+    }
+
+    /** Draws a basic black border */
+    method void drawBorder() {
+        // Draw black border
+        do Screen.setColor(true);
+        // Top line
+        do Screen.drawRectangle(posX,posY,posX + width,posY + 4);   
+        // Left line
+        do Screen.drawRectangle(posX,posY,posX + 4,posY + length);
+        // Bottom line
+        do Screen.drawRectangle(posX,posY + length - 4,posX + width, posY + length);
+        // Right line
+        do Screen.drawRectangle(posX + width - 4,posY,posX + width,posY + length);
+        return;
+    }
+
+    /** Print four text lines inside the rectangle */
+    method void printText(String textLine1, String textLine2, String textLine3, String textLine4) {
+        var int stringSize;
+        let stringSize = textLine1.length();
+        do Output.moveCursor(9, 32 - (stringSize / 2));
+        do Output.printString(textLine1);
+        let stringSize = textLine2.length();
+        do Output.moveCursor(10, 32 - (stringSize / 2));
+        do Output.printString(textLine2);
+        let stringSize = textLine3.length();
+        do Output.moveCursor(11, 32 - (stringSize / 2));
+        do Output.printString(textLine3);
+        let stringSize = textLine4.length();
+        do Output.moveCursor(12, 32 - (stringSize / 2));
+        do Output.printString(textLine4);
+        return;
+    }
+}
