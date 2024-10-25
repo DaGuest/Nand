@@ -3,6 +3,7 @@ class Background {
     field int gapSize;
     field Array gapWalls;
     field Array gapStartPositions;
+    field boolean animation;
 
     /** Constructs a new Background object that takes care of the scrolling background. */
     constructor Background new() {
@@ -10,6 +11,7 @@ class Background {
         let gapSize = 5;
         let gapWalls = Array.new(3);
         let gapStartPositions = Array.new(3);
+        let animation = false;
         do initializeWalls();
         return this;
     }
@@ -43,7 +45,7 @@ class Background {
         // Iterate through arrays
         while (~(arrayCounter = 0)) {
             let arrayCounter = arrayCounter - 1;
-            do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], false);
+            do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], false);    // Erase previous wall line.
             let gapWalls[arrayCounter] = Background.reduceValue(gapWalls[arrayCounter]);
             do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], true);
         }
@@ -57,34 +59,23 @@ class Background {
         var int startPosY;
 
         let i = 0;
-        let startPosX = startPos * 16;
+        let startPosX = startPos;
     
         do Screen.setColor(color);
 
         while (~(i = 16)) {
-            if (i = gapStartPos) {
-                // A gap in the wall is created
+            if (i = gapStartPos) {          // A gap in the wall is created
                 let i = i + gapSize;
             }
             let startPosY = i * 16;
 
-            do Screen.drawRectangle(startPosX, startPosY, startPosX + squareSize, startPosY + squareSize);
+            if (color) {
+                do drawWallPiece((i * 512) + startPosX);
+            }
+            else {
+                do eraseWallPiece(startPosX, i);
+            }
             let i = i + 1;
-        }
-        return;
-    }
-
-    /** Erase a piece of the scrolling wall. */
-    method void eraseWallLine(int startPos) {
-        do Screen.setColor(false);
-        do Screen.drawRectangle(startPos, 0, startPos + squareSize, squareSize);
-        return;
-    }
-
-    /** Reduces the gapSize */
-    method void reduceGapSize() {
-        if (gapSize > 1) {
-            let gapSize = gapSize - 1;
         }
         return;
     }
@@ -112,6 +103,80 @@ class Background {
             }
         }
         return false;
+    }
+
+    /** Draw wall animation */
+    method void drawWallPiece(int location) {
+        if (animation) {
+            do drawWallPieceOne(location);
+            let animation = false;
+        }
+        else {
+            do drawWallPieceTwo(location);
+            let animation = true;
+        }
+        return;
+    }
+
+    /** Draw first frame of wall piece animation */
+    method void drawWallPieceOne(int location) {
+        var int memAddress; 
+        let memAddress = 16384+location;
+        // column 0
+        do Memory.poke(memAddress, 64);
+        do Memory.poke(memAddress +32, 192);
+        do Memory.poke(memAddress +64, 448);
+        do Memory.poke(memAddress +96, 960);
+        do Memory.poke(memAddress +128, 1056);
+        do Memory.poke(memAddress +160, 2064);
+        do Memory.poke(memAddress +192, -3832);
+        do Memory.poke(memAddress +224, 29132);
+        do Memory.poke(memAddress +256, 13198);
+        do Memory.poke(memAddress +288, 4239);
+        do Memory.poke(memAddress +320, 2064);
+        do Memory.poke(memAddress +352, 3104);
+        do Memory.poke(memAddress +384, 960);
+        do Memory.poke(memAddress +416, 896);
+        do Memory.poke(memAddress +448, 768);
+        do Memory.poke(memAddress +480, 512);
+        return;
+    }
+
+    /** Draw second frame of wall piece animation */
+    method void drawWallPieceTwo(int location) {
+        var int memAddress; 
+        let memAddress = 16384+location;
+        // column 0
+        do Memory.poke(memAddress, 2048);
+        do Memory.poke(memAddress +32, 3072);
+        do Memory.poke(memAddress +64, 4071);
+        do Memory.poke(memAddress +96, 1566);
+        do Memory.poke(memAddress +128, 1036);
+        do Memory.poke(memAddress +160, 2116);
+        do Memory.poke(memAddress +192, 2500);
+        do Memory.poke(memAddress +224, 2276);
+        do Memory.poke(memAddress +256, 2116);
+        do Memory.poke(memAddress +288, 3080);
+        do Memory.poke(memAddress +320, 7704);
+        do Memory.poke(memAddress +352, 14844);
+        do Memory.poke(memAddress +384, 12);
+        do Memory.poke(memAddress +416, 4);
+        return;
+    }
+
+    /** Erase a piece of wall at given location */
+    method void eraseWallPiece(int posX, int posY) {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(posX * 16, posY * 16, (posX * 16) + 16, (posY * 16) + 16);
+        return;
+    }
+
+    /** Reduces the gapSize */
+    method void reduceGapSize() {
+        if (gapSize > 1) {
+            let gapSize = gapSize - 1;
+        }
+        return;
     }
 
     /** Helper function to reduce specific value */

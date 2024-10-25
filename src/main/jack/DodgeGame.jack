@@ -47,7 +47,7 @@ class DodgeGame {
                 do background.reduceGapSize();
                 let difficultyTimer = 64;
             }
-            let exit = background.checkCollision(player.getPositionY());
+            
             do player.draw();
             do background.scroll();
             
@@ -67,6 +67,7 @@ class DodgeGame {
                     }
                 }
             }
+            let exit = background.checkCollision(player.getPositionY());
             do Sys.wait(50);
         }
         do player.drawWhite();

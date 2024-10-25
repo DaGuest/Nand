@@ -2,12 +2,14 @@ class Player {
     field int positionX;
     field int positionY;
     field int lastPositionY;
+    field boolean animation;
 
     /** Constructs a new Player object that can move the player over the screen vertically */
     constructor Player new() {
-        let positionX = (2 * 16) - 8;
+        let positionX = 2;
         let positionY = 7;
         let lastPositionY = 7;
+        let animation = false;
         return this;
     }
 
@@ -20,16 +22,18 @@ class Player {
     /** Draws the player on the screen at it's current position */
     method void draw() {
         do Screen.setColor(false);
-        do Screen.drawCircle(positionX, (lastPositionY * 16) + 8, 8);
+        do Screen.drawRectangle(positionX * 16, (lastPositionY * 16), (positionX * 16) + 16, (lastPositionY * 16) + 16);
+        
         do Screen.setColor(true);
-        do Screen.drawCircle(positionX, (positionY * 16) + 8, 8);
+        do drawBird((positionY * 512) + positionX);
+        
         return;
     }
 
     /** Draws player in white to display where he died */
     method void drawWhite() {
         do Screen.setColor(false);
-        do Screen.drawCircle(positionX, (positionY * 16) + 8, 8);
+        do drawBird((positionY * 512) + positionX);
         return;
     }
 
@@ -50,7 +54,71 @@ class Player {
         return;
     }
 
+    /** Returns the current vertical postion of the player */
     method int getPositionY() {
         return positionY;
     }
+
+    /** Draw bird animation */
+    method void drawBird(int location) {
+        if (animation) {
+            do drawBirdUp(location);
+            let animation = false;
+        }
+        else {
+            do drawBirdDown(location);
+            let animation = true;
+        }
+        return;
+    }
+
+    /** Draws bird with wings up */
+    method void drawBirdUp(int location) {
+        var int memAddress; 
+        let memAddress = 16384+location;
+
+        do Memory.poke(memAddress, 3840);
+        do Memory.poke(memAddress +32, 4224);
+        do Memory.poke(memAddress +64, 8256);
+        do Memory.poke(memAddress +96, 19495);
+        do Memory.poke(memAddress +128, 19497);
+        do Memory.poke(memAddress +160, -32751);
+        do Memory.poke(memAddress +192, 24577);
+        do Memory.poke(memAddress +224, 4097);
+        do Memory.poke(memAddress +256, 4098);
+        do Memory.poke(memAddress +288, 4100);
+        do Memory.poke(memAddress +320, 4098);
+        do Memory.poke(memAddress +352, 2049);
+        do Memory.poke(memAddress +384, 1026);
+        do Memory.poke(memAddress +416, 964);
+        do Memory.poke(memAddress +448, 40);
+        do Memory.poke(memAddress +480, 16);
+        return;
+    }
+
+    /** Draws bird with wings down */
+    method void drawBirdDown(int location) {
+        var int memAddress; 
+        let memAddress = 16384+location;
+        
+        do Memory.poke(memAddress, 3840);
+        do Memory.poke(memAddress +32, 4224);
+        do Memory.poke(memAddress +64, 8256);
+        do Memory.poke(memAddress +96, 19488);
+        do Memory.poke(memAddress +128, 19488);
+        do Memory.poke(memAddress +160, -32720);
+        do Memory.poke(memAddress +192, 24784);
+        do Memory.poke(memAddress +224, 4872);
+        do Memory.poke(memAddress +256, 7176);
+        do Memory.poke(memAddress +288, 4108);
+        do Memory.poke(memAddress +320, 4114);
+        do Memory.poke(memAddress +352, 4113);
+        do Memory.poke(memAddress +384, 8226);
+        do Memory.poke(memAddress +416, 8388);
+        do Memory.poke(memAddress +448, 16168);
+        do Memory.poke(memAddress +480, 16);
+        return;
+    }
+
+
 }
