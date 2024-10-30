@@ -44,12 +44,12 @@ class Background {
 
         let arrayCounter = 3;
 
-        // Iterate through arrays
+        // Erase the three walls and then draw 3 walls at there new position
         while (~(arrayCounter = 0)) {
             let arrayCounter = arrayCounter - 1;
-            do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], false);    // Erase previous wall line.
+            do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], false);                    // Erase previous wall line.
             let gapWalls[arrayCounter] = Background.reduceValue(gapWalls[arrayCounter]);
-            if (gapWalls[arrayCounter] = 31) {
+            if (gapWalls[arrayCounter] = 31) {                                                                  // Reset gap position if wall is coming in from the right for the first time
                 let gapStartPositions[arrayCounter] = generateRandomNumber(gapStartPositions[arrayCounter]);
             }
             do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], true);
@@ -57,23 +57,19 @@ class Background {
         return;
     }
 
-    /** Draw a piece of the scrolling wall. */
-    method void drawWallLine(int startPos, int gapStartPos, boolean color) {
-        var int i;
-        var int startPosX;
-        var int startPosY;
+    /************************************/
+    //          DRAWING METHODS
+    /************************************/
 
+    /** Draw a piece of the scrolling wall. */
+    method void drawWallLine(int startPosX, int gapStartPos, boolean color) {
+        var int i;
         let i = 0;
-        let startPosX = startPos;
-    
-        do Screen.setColor(color);
 
         while (~(i = 16)) {
             if (i = gapStartPos) {          // A gap in the wall is created
                 let i = i + gapSize;
             }
-            let startPosY = i * 16;
-
             if (color) {
                 do drawWallPiece((i * 512) + startPosX);
             }
@@ -84,6 +80,32 @@ class Background {
         }
         return;
     }
+
+    /** Draw wall animation */
+    method void drawWallPiece(int location) {
+        do Screen.setColor(true); 
+
+        if (animation) {
+            do drawWallPieceOne(location);
+            let animation = false;
+        }
+        else {
+            do drawWallPieceTwo(location);
+            let animation = true;
+        }
+        return;
+    }
+
+    /** Erase a piece of wall at given location */
+    method void eraseWallPiece(int posX, int posY) {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(posX * 16, posY * 16, (posX * 16) + squareSize, (posY * 16) + squareSize);
+        return;
+    }
+
+    /************************************/
+    //      HELPER METHODS/FUNCTIONS
+    /************************************/
 
     /** Checks if there is a collision of a wall with the player that frame */
     method boolean checkCollision(int playerPositionY) {
@@ -110,17 +132,32 @@ class Background {
         return false;
     }
 
-    /** Draw wall animation */
-    method void drawWallPiece(int location) {
-        if (animation) {
-            do drawWallPieceOne(location);
-            let animation = false;
-        }
-        else {
-            do drawWallPieceTwo(location);
-            let animation = true;
+    /** Reduces the gapSize */
+    method void reduceGapSize() {
+        if (gapSize > 1) {
+            let gapSize = gapSize - 1;
         }
         return;
+    }
+
+    /** Select a "random" number for the purpose of creating different gap start points. */
+    method int generateRandomNumber(int currentStartPoint) {
+        if (randomSeed) {
+            let currentStartPoint = currentStartPoint + 2;
+        }
+        else {
+            let currentStartPoint = currentStartPoint - 5;
+        }
+        if (currentStartPoint < 2) {
+            let currentStartPoint = 10;
+        }
+        else  {
+            if (currentStartPoint > 10) {
+                let currentStartPoint = 3;
+            }
+        }
+        let randomSeed = (~randomSeed);
+        return currentStartPoint;
     }
 
     /** Draw first frame of wall piece animation */
@@ -167,41 +204,6 @@ class Background {
         do Memory.poke(memAddress +384, 12);
         do Memory.poke(memAddress +416, 4);
         return;
-    }
-
-    /** Erase a piece of wall at given location */
-    method void eraseWallPiece(int posX, int posY) {
-        do Screen.setColor(false);
-        do Screen.drawRectangle(posX * 16, posY * 16, (posX * 16) + squareSize, (posY * 16) + squareSize);
-        return;
-    }
-
-    /** Reduces the gapSize */
-    method void reduceGapSize() {
-        if (gapSize > 1) {
-            let gapSize = gapSize - 1;
-        }
-        return;
-    }
-
-    /** Select a "random" number for the purpose of creating different gap start points. */
-    method int generateRandomNumber(int currentStartPoint) {
-        if (randomSeed) {
-            let currentStartPoint = currentStartPoint + 2;
-        }
-        else {
-            let currentStartPoint = currentStartPoint - 5;
-        }
-        if (currentStartPoint < 2) {
-            let currentStartPoint = 10;
-        }
-        else  {
-            if (currentStartPoint > 10) {
-                let currentStartPoint = 3;
-            }
-        }
-        let randomSeed = (~randomSeed);
-        return currentStartPoint;
     }
 
     /** Helper function to reduce specific value */

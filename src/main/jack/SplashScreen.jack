@@ -20,6 +20,10 @@ class SplashScreen {
         return;
     }
 
+    /************************************/
+    //          DRAWING METHODS
+    /************************************/
+
     /** Draw a splash screen with the given lines of text */
     method void drawSplashScreen(String textLine1, String textLine2, String textLine3, String textLine4) {
         do drawBaseRectangle();
@@ -50,6 +54,10 @@ class SplashScreen {
         do Screen.drawRectangle(posX + width - 4,posY,posX + width,posY + length);
         return;
     }
+
+    /************************************/
+    //          PRINTING METHODS
+    /************************************/
 
     /** Print four text lines inside the rectangle */
     method void printText(String textLine1, String textLine2, String textLine3, String textLine4) {

@@ -20,6 +20,10 @@ class DodgeGame {
         return;
     }
 
+    /************************************/
+    //     BUSINESS LOGIC METHODS
+    /************************************/
+
     /** Starts running the game loop. */
     method void run() {
         var char key;

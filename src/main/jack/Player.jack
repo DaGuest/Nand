@@ -19,23 +19,9 @@ class Player {
         return;
     }
 
-    /** Draws the player on the screen at it's current position */
-    method void draw() {
-        do Screen.setColor(false);
-        do Screen.drawRectangle(positionX * 16, (lastPositionY * 16), (positionX * 16) + 16, (lastPositionY * 16) + 16);
-        
-        do Screen.setColor(true);
-        do drawBird((positionY * 512) + positionX);
-        
-        return;
-    }
-
-    /** Draws player in white to display where he died */
-    method void drawWhite() {
-        do Screen.setColor(false);
-        do drawBird((positionY * 512) + positionX);
-        return;
-    }
+    /************************************/
+    //       PLAYER LOGIC METHODS
+    /************************************/
 
     /** Move player up or down 1 step */
     method void move(boolean up) {
@@ -54,9 +40,26 @@ class Player {
         return;
     }
 
-    /** Returns the current vertical postion of the player */
-    method int getPositionY() {
-        return positionY;
+    /************************************/
+    //          DRAWING METHODS
+    /************************************/
+
+    /** Draws the player on the screen at it's current position */
+    method void draw() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(positionX * 16, (lastPositionY * 16), (positionX * 16) + 16, (lastPositionY * 16) + 16);
+        
+        do Screen.setColor(true);
+        do drawBird((positionY * 512) + positionX);
+        
+        return;
+    }
+
+    /** Draws player in white to display where he died */
+    method void drawWhite() {
+        do Screen.setColor(false);
+        do drawBird((positionY * 512) + positionX);
+        return;
     }
 
     /** Draw bird animation */
@@ -70,6 +73,15 @@ class Player {
             let animation = true;
         }
         return;
+    }
+
+    /************************************/
+    //      HELPER METHODS/FUNCTIONS
+    /************************************/
+
+    /** Returns the current vertical postion of the player */
+    method int getPositionY() {
+        return positionY;
     }
 
     /** Draws bird with wings up */
