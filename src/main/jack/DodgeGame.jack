@@ -31,6 +31,7 @@ class DodgeGame {
         let start = false;
         let difficultyTimer = 64;
 
+        // Draw a splashscreen with game isntructions.
         while (~start) {
             do splashScreen.drawSplashScreen("-- Dodge the walls! --", " ","Use up/down arrow keys.", "To start: hold SPACE!");
             let key = Keyboard.keyPressed();
@@ -41,6 +42,7 @@ class DodgeGame {
         }
         do splashScreen.drawBaseRectangle();
 
+        // Run the game loop and handle input.
         while (~exit) {
             let difficultyTimer = difficultyTimer - 1;
             if (difficultyTimer = 0) {
@@ -70,6 +72,8 @@ class DodgeGame {
             let exit = background.checkCollision(player.getPositionY());
             do Sys.wait(50);
         }
+
+        // Draw a game over splashscreen.
         do player.drawWhite();
         do splashScreen.drawSplashScreen(" ", "Game Over!", " ", "Again? Please Reload");
         return;

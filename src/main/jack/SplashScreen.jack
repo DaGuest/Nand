@@ -5,6 +5,7 @@ class SplashScreen {
     field int length;
 
     /** Constructs a new SplashScreen object. */
+    /** A splashscreen can be used for to show a message to the user. */
     constructor SplashScreen new() {
         let posX = 128;
         let posY = 64;

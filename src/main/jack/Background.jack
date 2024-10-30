@@ -4,6 +4,7 @@ class Background {
     field Array gapWalls;
     field Array gapStartPositions;
     field boolean animation;
+    field boolean randomSeed;
 
     /** Constructs a new Background object that takes care of the scrolling background. */
     constructor Background new() {
@@ -12,6 +13,7 @@ class Background {
         let gapWalls = Array.new(3);
         let gapStartPositions = Array.new(3);
         let animation = false;
+        let randomSeed = true;
         do initializeWalls();
         return this;
     }
@@ -29,9 +31,9 @@ class Background {
         let gapWalls[0] = 10;
         let gapWalls[1] = 20;
         let gapWalls[2] = 30;
-        let gapStartPositions[0] = 5;
-        let gapStartPositions[1] = 9;
-        let gapStartPositions[2] = 3;
+        let gapStartPositions[0] = 6;
+        let gapStartPositions[1] = 2;
+        let gapStartPositions[2] = 9;
         return;
     }
 
@@ -47,6 +49,9 @@ class Background {
             let arrayCounter = arrayCounter - 1;
             do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], false);    // Erase previous wall line.
             let gapWalls[arrayCounter] = Background.reduceValue(gapWalls[arrayCounter]);
+            if (gapWalls[arrayCounter] = 31) {
+                let gapStartPositions[arrayCounter] = generateRandomNumber(gapStartPositions[arrayCounter]);
+            }
             do drawWallLine(gapWalls[arrayCounter], gapStartPositions[arrayCounter], true);
         }
         return;
@@ -167,7 +172,7 @@ class Background {
     /** Erase a piece of wall at given location */
     method void eraseWallPiece(int posX, int posY) {
         do Screen.setColor(false);
-        do Screen.drawRectangle(posX * 16, posY * 16, (posX * 16) + 16, (posY * 16) + 16);
+        do Screen.drawRectangle(posX * 16, posY * 16, (posX * 16) + squareSize, (posY * 16) + squareSize);
         return;
     }
 
@@ -177,6 +182,26 @@ class Background {
             let gapSize = gapSize - 1;
         }
         return;
+    }
+
+    /** Select a "random" number for the purpose of creating different gap start points. */
+    method int generateRandomNumber(int currentStartPoint) {
+        if (randomSeed) {
+            let currentStartPoint = currentStartPoint + 2;
+        }
+        else {
+            let currentStartPoint = currentStartPoint - 5;
+        }
+        if (currentStartPoint < 2) {
+            let currentStartPoint = 10;
+        }
+        else  {
+            if (currentStartPoint > 10) {
+                let currentStartPoint = 3;
+            }
+        }
+        let randomSeed = (~randomSeed);
+        return currentStartPoint;
     }
 
     /** Helper function to reduce specific value */
