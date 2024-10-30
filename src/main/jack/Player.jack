@@ -45,20 +45,16 @@ class Player {
     /************************************/
 
     /** Draws the player on the screen at it's current position */
-    method void draw() {
+    method void draw(boolean dead) {
         do Screen.setColor(false);
         do Screen.drawRectangle(positionX * 16, (lastPositionY * 16), (positionX * 16) + 16, (lastPositionY * 16) + 16);
         
-        do Screen.setColor(true);
-        do drawBird((positionY * 512) + positionX);
-        
-        return;
-    }
-
-    /** Draws player in white to display where he died */
-    method void drawWhite() {
-        do Screen.setColor(false);
-        do drawBird((positionY * 512) + positionX);
+        if (dead) {
+            do drawInvertedBird((positionY * 512) + positionX);
+        }
+        else {
+            do drawBird((positionY * 512) + positionX);
+        }
         return;
     }
 
@@ -132,5 +128,27 @@ class Player {
         return;
     }
 
-
+    /** Draw an inverted bird to indicate gameover */
+    method void drawInvertedBird(int location) {
+        var int memAddress; 
+        let memAddress = 16384+location;
+        // column 0
+        do Memory.poke(memAddress, -3841);
+        do Memory.poke(memAddress +32, -4225);
+        do Memory.poke(memAddress +64, -8272);
+        do Memory.poke(memAddress +96, -19538);
+        do Memory.poke(memAddress +128, -19490);
+        do Memory.poke(memAddress +160, 32766);
+        do Memory.poke(memAddress +192, -16386);
+        do Memory.poke(memAddress +224, -8195);
+        do Memory.poke(memAddress +256, -4101);
+        do Memory.poke(memAddress +288, -4105);
+        do Memory.poke(memAddress +320, -4101);
+        do Memory.poke(memAddress +352, -2051);
+        do Memory.poke(memAddress +384, -1026);
+        do Memory.poke(memAddress +416, -995);
+        do Memory.poke(memAddress +448, -21);
+        do Memory.poke(memAddress +480, -9);
+        return;
+    }
 }

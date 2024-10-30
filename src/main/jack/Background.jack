@@ -31,11 +31,15 @@ class Background {
         let gapWalls[0] = 10;
         let gapWalls[1] = 20;
         let gapWalls[2] = 30;
-        let gapStartPositions[0] = 6;
+        let gapStartPositions[0] = 5;
         let gapStartPositions[1] = 2;
         let gapStartPositions[2] = 9;
         return;
     }
+
+    /************************************/
+    //     BUSINESS LOGIC METHODS
+    /************************************/
 
     /** Scrolls the background to the left of the screen */
     method void scroll() {

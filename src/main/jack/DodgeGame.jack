@@ -16,6 +16,7 @@ class DodgeGame {
     method void dispose() {
         do background.dispose();
         do player.dispose();
+        do splashScreen.dispose();
         do Memory.deAlloc(this);
         return;
     }
@@ -53,8 +54,8 @@ class DodgeGame {
                 do background.reduceGapSize();
                 let difficultyTimer = 64;
             }
-            
-            do player.draw();
+
+            do player.draw(false);
             do background.scroll();
             
             let key = Keyboard.keyPressed();
@@ -78,7 +79,7 @@ class DodgeGame {
         }
 
         // Draw a game over splashscreen.
-        do player.drawWhite();
+        do player.draw(true);
         do splashScreen.drawSplashScreen(" ", "Game Over!", " ", "Again? Please Reload");
         return;
     }
