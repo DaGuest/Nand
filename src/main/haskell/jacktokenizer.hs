@@ -1,4 +1,3 @@
-import Control.Arrow (Arrow (second))
 import Data.Char
 import System.IO
 
