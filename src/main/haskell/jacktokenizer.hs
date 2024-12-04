@@ -1,3 +1,5 @@
+module JackTokenizer where
+
 import Data.Char
 import System.IO
 
@@ -13,12 +15,13 @@ tokenize :: String -> [Token]
 tokenize [] = []
 tokenize (c : cs)
   | c == '/' = comment c cs
-  | c `elem` "+-*/&|<>=~[]()[].,;" = TokSymbol c : tokenize cs
+  | c `elem` "+-*/&|<>=~{}()[].,;" = TokSymbol c : tokenize cs
   | c == '"' = strConstant cs
   | isDigit c = number c cs
   | isAlpha c = keywordOrIdent c cs
   | isSpace c = tokenize cs
-  | otherwise = error $ "Cannot tokenize " ++ [c]
+  | c == '\n' = tokenize cs
+  | otherwise = error $ "Symbol not recognized: " ++ [c] ++ " - Add this symbol to tokenizer."
 
 -- Get string constant out from between the "" chars.
 strConstant :: [Char] -> [Token]
@@ -32,6 +35,7 @@ identifier c cs =
   let (str, cs') = span isAlphaNumUnderscore cs
    in TokIdent (c : str) : tokenize cs'
 
+-- Checks for known keywords, if not it is labeled as identifier
 keywordOrIdent :: Char -> [Char] -> [Token]
 keywordOrIdent c cs
   | k
@@ -68,13 +72,14 @@ number c cs =
   let (digs, cs') = span isDigit cs
    in TokInt (read (c : digs)) : tokenize cs'
 
--- Identifies a comment (it should have \n at the end of the comment)
+-- Identifies a comment.
 comment :: Char -> [Char] -> [Token]
 comment c (c' : cs)
   | c' == '/' = skipTillNewLine cs
   | otherwise = TokSymbol c : tokenize (c' : cs)
 
 -- A helper function to run though a comment until it encounters a newline symbol or the rest string is empty
+skipTillNewLine :: [Char] -> [Token]
 skipTillNewLine (c : cs)
   | c == '\n' = tokenize cs
   | null cs = []
