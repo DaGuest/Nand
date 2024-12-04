@@ -13,6 +13,7 @@ data Token
 tokenize :: String -> [Token]
 tokenize [] = []
 tokenize (c : cs)
+  | c == '/' = comment c cs
   | c `elem` "+-*/&|<>=~[]()[].,;" = TokSymbol c : tokenize cs
   | c == '"' = strConstant cs
   | isDigit c = number c cs
@@ -67,6 +68,18 @@ number :: Char -> [Char] -> [Token]
 number c cs =
   let (digs, cs') = span isDigit cs
    in TokInt (read (c : digs)) : tokenize cs'
+
+-- Identifies a comment (it should have \n at the end of the comment)
+comment :: Char -> [Char] -> [Token]
+comment c (c' : cs)
+  | c' == '/' = skipTillNewLine cs
+  | otherwise = TokSymbol c : tokenize (c' : cs)
+
+-- A helper function to run though a comment until it encounters a newline symbol or the rest string is empty
+skipTillNewLine (c : cs)
+  | c == '\n' = tokenize cs
+  | null cs = []
+  | otherwise = skipTillNewLine cs
 
 -- A helper function to check if a given char is a alphanum or '_' char.
 isAlphaNumUnderscore :: Char -> Bool
