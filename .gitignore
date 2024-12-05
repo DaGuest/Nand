@@ -54,3 +54,9 @@ replay_pid*
 
 /src/main/jack/*
 !*.jack
+
+# Haskell rules
+# -------- #
+
+/src/main/haskell/*
+!*.hs
