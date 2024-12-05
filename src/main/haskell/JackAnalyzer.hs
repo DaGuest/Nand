@@ -10,7 +10,7 @@ main = do
   files <- fileNames args
   fileContents <- mapM readFile files
   let fileNameWithTokens = zip files $ map tokenize fileContents
-  mapM (\(f, t) -> writeFile "test.txt" (concat (map showTokens t))) fileNameWithTokens
+  mapM (\(f, t) -> writeFile (replaceExtension f ".xml") (concatMap showTokens t)) fileNameWithTokens
 
 -- TODO
 
@@ -28,10 +28,10 @@ fileNames dir
   | isFolder dir = getFiles dir
   | otherwise = return [dir]
 
--- A function to compile all the .jack files into the .xml output file
+-- A helper function to print the XML format for tokens
 showTokens :: Token -> String
 showTokens (TokIdent s) = "<identifier>" ++ s ++ "</identifier>\n"
-showTokens (TokSymbol c) = "<symbol>" ++ [c] ++ "</symbol>\n"
+showTokens (TokSymbol s) = "<symbol>" ++ s ++ "</symbol>\n"
 showTokens (TokKey s) = "<keyword>" ++ s ++ "</keyword>\n"
-showTokens (TokInt i) = "<keyword>" ++ "</keyword>\n"
-showTokens (TokStr s) = "<string>" ++ s ++ "</string>\n"
+showTokens (TokInt i) = "<integerConstant>" ++ show i ++ "</integerConstant>\n"
+showTokens (TokStr s) = "<stringConstant>" ++ s ++ "</stringConstant>\n"

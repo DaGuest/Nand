@@ -4,7 +4,7 @@ import Data.Char
 import System.IO
 
 data Token
-  = TokSymbol Char
+  = TokSymbol String
   | TokIdent String
   | TokKey String
   | TokInt Int
@@ -15,7 +15,7 @@ tokenize :: String -> [Token]
 tokenize [] = []
 tokenize (c : cs)
   | c == '/' = comment c cs
-  | c `elem` "+-*/&|<>=~{}()[].,;" = TokSymbol c : tokenize cs
+  | c `elem` "+-*/&|<>=~{}()[].,;" = TokSymbol (changeSymbol c) : tokenize cs
   | c == '"' = strConstant cs
   | isDigit c = number c cs
   | isAlpha c = keywordOrIdent c cs
@@ -76,7 +76,7 @@ number c cs =
 comment :: Char -> [Char] -> [Token]
 comment c (c' : cs)
   | c' == '/' = skipTillNewLine cs
-  | otherwise = TokSymbol c : tokenize (c' : cs)
+  | otherwise = TokSymbol [c] : tokenize (c' : cs)
 
 -- A helper function to run though a comment until it encounters a newline symbol or the rest string is empty
 skipTillNewLine :: [Char] -> [Token]
@@ -90,3 +90,11 @@ isAlphaNumUnderscore :: Char -> Bool
 isAlphaNumUnderscore c
   | c == '_' = True
   | otherwise = isAlphaNum c
+
+-- Save symbol in the correct format
+changeSymbol :: Char -> String
+changeSymbol '<' = "&lt;"
+changeSymbol '>' = "&gt;"
+changeSymbol '"' = "&quot;"
+changeSymbol '&' = "&amp;"
+changeSymbol c = [c]
