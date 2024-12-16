@@ -7,7 +7,7 @@ data Token
   = TokSymbol String
   | TokIdent String
   | TokKey String
-  | TokInt Int
+  | TokInt String
   | TokStr String
   deriving (Show, Eq)
 
@@ -70,7 +70,7 @@ keywordOrIdent c cs
 number :: Char -> [Char] -> [Token]
 number c cs =
   let (digs, cs') = span isDigit cs
-   in TokInt (read (c : digs)) : tokenize cs'
+   in TokInt (c : digs) : tokenize cs'
 
 -- Identifies a comment.
 comment :: Char -> [Char] -> [Token]
@@ -98,3 +98,17 @@ changeSymbol '>' = "&gt;"
 changeSymbol '"' = "&quot;"
 changeSymbol '&' = "&amp;"
 changeSymbol c = [c]
+
+getWrappedToken :: Token -> String
+getWrappedToken (TokIdent s) = "<identifier>" ++ s ++ "</identifier>"
+getWrappedToken (TokKey s) = "<keyword>" ++ s ++ "</keyword>"
+getWrappedToken (TokSymbol s) = "<symbol>" ++ s ++ "</symbol>"
+getWrappedToken (TokStr s) = "<stringConstant>" ++ s ++ "</stringConstant>"
+getWrappedToken (TokInt s) = "<intConstant>" ++ s ++ "</intConstant>"
+
+getTokenString :: Token -> String
+getTokenString (TokIdent s) = s
+getTokenString (TokKey s) = s
+getTokenString (TokSymbol s) = s
+getTokenString (TokStr s) = s
+getTokenString (TokInt s) = s

@@ -1,4 +1,6 @@
+import CompilationEngine
 import Control.Monad (filterM)
+import Data.List (intercalate)
 import JackTokenizer
 import System.Directory
 import System.Environment (getArgs)
@@ -10,7 +12,8 @@ main = do
   files <- fileNames args
   fileContents <- mapM readFile files
   let fileNameWithTokens = zip files $ map tokenize fileContents
-  mapM (\(f, t) -> writeFile (replaceExtension f ".xml") (concatMap showTokens t)) fileNameWithTokens
+  -- mapM (\(f, t) -> writeFile (replaceExtension f ".xml") $ concatMap showTokens t) fileNameWithTokens
+  mapM (\(f, t) -> writeFile (replaceExtension f ".xml") $ intercalate "\n" $ eval t) fileNameWithTokens
 
 -- TODO
 
