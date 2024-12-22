@@ -26,7 +26,7 @@ tokenize (c : cs)
 -- Get string constant out from between the "" chars.
 strConstant :: [Char] -> [Token]
 strConstant (c : cs) =
-  let (str, _ : cs') = span isAlphaNum cs
+  let (str, _ : cs') = span isStrChar cs
    in TokStr (c : str) : tokenize cs'
 
 -- Identifies multiple character and combines them into a single identifier.
@@ -91,6 +91,11 @@ isAlphaNumUnderscore c
   | c == '_' = True
   | otherwise = isAlphaNum c
 
+isStrChar :: Char -> Bool
+isStrChar c
+  | c == '"' = False
+  | otherwise = True
+
 -- Save symbol in the correct format
 changeSymbol :: Char -> String
 changeSymbol '<' = "&lt;"
@@ -104,7 +109,7 @@ getWrappedToken (TokIdent s) = "<identifier> " ++ s ++ " </identifier>"
 getWrappedToken (TokKey s) = "<keyword> " ++ s ++ " </keyword>"
 getWrappedToken (TokSymbol s) = "<symbol> " ++ s ++ " </symbol>"
 getWrappedToken (TokStr s) = "<stringConstant> " ++ s ++ " </stringConstant>"
-getWrappedToken (TokInt s) = "<intConstant> " ++ s ++ " </intConstant>"
+getWrappedToken (TokInt s) = "<integerConstant> " ++ s ++ " </integerConstant>"
 
 getTokenString :: Token -> String
 getTokenString (TokIdent s) = s

@@ -106,7 +106,7 @@ letSt = do
   y <- getWrappedToken <$> sat (isGivenSymbol "=")
   e <- expr
   z <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ k : x : concat t ++ (y : e) ++ [z]
+  return $ wrapXML "letStatement" $ k : x : concat t ++ (y : e) ++ [z]
 
 --  WHILE STATEMENT
 whileSt :: Parser [String]
@@ -127,7 +127,7 @@ ifSt = do
   ss <- bracketStatements
   -- ( 'else { statements }' )? (0 or 1)
   el <- concat <$> many elseSt
-  return $ k : eh ++ ss ++ el
+  return $ wrapXML "ifStatement" $ k : eh ++ ss ++ el
 
 elseSt :: Parser [String]
 elseSt = do
@@ -156,6 +156,6 @@ returnSt = do
 bracketStatements :: Parser [String]
 bracketStatements = do
   hl <- getWrappedToken <$> sat (isGivenSymbol "{")
-  ss <- statements
+  ss <- wrapXML "statements" . concat <$> many statements
   hr <- getWrappedToken <$> sat (isGivenSymbol "}")
   return $ hl : ss ++ [hr]

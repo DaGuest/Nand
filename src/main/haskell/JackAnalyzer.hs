@@ -31,3 +31,11 @@ fileNames :: FilePath -> IO [FilePath]
 fileNames dir
   | isFolder dir = getFiles dir
   | otherwise = return [dir]
+
+-- A helper function to print the XML format for tokens
+showTokens :: Token -> String
+showTokens (TokIdent s) = "<identifier> " ++ s ++ " </identifier>\n"
+showTokens (TokSymbol s) = "<symbol> " ++ s ++ " </symbol>\n"
+showTokens (TokKey s) = "<keyword> " ++ s ++ " </keyword>\n"
+showTokens (TokInt i) = "<integerConstant> " ++ show i ++ " </integerConstant>\n"
+showTokens (TokStr s) = "<stringConstant> " ++ s ++ " </stringConstant>\n"
