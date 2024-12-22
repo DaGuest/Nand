@@ -100,11 +100,11 @@ changeSymbol '&' = "&amp;"
 changeSymbol c = [c]
 
 getWrappedToken :: Token -> String
-getWrappedToken (TokIdent s) = "<identifier>" ++ s ++ "</identifier>"
-getWrappedToken (TokKey s) = "<keyword>" ++ s ++ "</keyword>"
-getWrappedToken (TokSymbol s) = "<symbol>" ++ s ++ "</symbol>"
-getWrappedToken (TokStr s) = "<stringConstant>" ++ s ++ "</stringConstant>"
-getWrappedToken (TokInt s) = "<intConstant>" ++ s ++ "</intConstant>"
+getWrappedToken (TokIdent s) = "<identifier> " ++ s ++ " </identifier>"
+getWrappedToken (TokKey s) = "<keyword> " ++ s ++ " </keyword>"
+getWrappedToken (TokSymbol s) = "<symbol> " ++ s ++ " </symbol>"
+getWrappedToken (TokStr s) = "<stringConstant> " ++ s ++ " </stringConstant>"
+getWrappedToken (TokInt s) = "<intConstant> " ++ s ++ " </intConstant>"
 
 getTokenString :: Token -> String
 getTokenString (TokIdent s) = s
@@ -112,3 +112,35 @@ getTokenString (TokKey s) = s
 getTokenString (TokSymbol s) = s
 getTokenString (TokStr s) = s
 getTokenString (TokInt s) = s
+
+-- GENERAL HELPER FUNCTIONS
+
+wrapXML :: String -> [String] -> [String]
+wrapXML s xs = (("<" ++ s ++ "> ") : xs) ++ [" </" ++ s ++ ">"]
+
+isTermToken :: Token -> Bool
+isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
+isTermToken (TokInt _) = True
+isTermToken (TokIdent _) = True
+isTermToken (TokStr _) = True
+isTermToken _ = False
+
+isOpToken :: Token -> Bool
+isOpToken (TokSymbol s) = s `elem` ["&lt;", "&gt;", "=", "+", "-", "*", "/", "&amp;", "|"]
+isOpToken _ = False
+
+isGivenKeyToken :: String -> Token -> Bool
+isGivenKeyToken s (TokKey t) = t == s
+isGivenKeyToken _ _ = False
+
+isVarNameToken :: Token -> Bool
+isVarNameToken (TokIdent _) = True
+isVarNameToken _ = False
+
+isGivenSymbol :: String -> Token -> Bool
+isGivenSymbol s (TokSymbol t) = t == s
+isGivenSymbol _ _ = False
+
+isUnaryOpToken :: Token -> Bool
+isUnaryOpToken (TokSymbol s) = s `elem` ["~", "-"]
+isUnaryOpToken _ = False

@@ -2,67 +2,7 @@ module CompilationEngine where
 
 import Control.Applicative
 import JackTokenizer
-
-newtype Parser a = P ([Token] -> [(a, [Token])])
-
-parse :: Parser a -> [Token] -> [(a, [Token])]
-parse (P p) inp = p inp
-
-item :: Parser Token
-item =
-  P
-    ( \inp -> case inp of
-        [] -> []
-        (x : xs) -> [(x, xs)]
-    )
-
-instance Functor Parser where
-  -- fmap :: (a -> b) -> Parser a -> Parser b
-  fmap g p =
-    P
-      ( \inp -> case parse p inp of
-          [] -> []
-          [(v, out)] -> [(g v, out)]
-      )
-
-instance Applicative Parser where
-  -- pure :: a -> Parser a
-  pure v = P (\inp -> [(v, inp)])
-
-  -- <*> :: Parser (a -> b) -> Parser a -> Parser b
-  pg <*> px =
-    P
-      ( \inp -> case parse pg inp of
-          [] -> []
-          [(g, out)] -> parse (fmap g px) out
-      )
-
-instance Monad Parser where
-  -- (>>=) :: Parser a -> (a -> Parser b) -> Parser b
-  p >>= f =
-    P
-      ( \inp -> case parse p inp of
-          [] -> []
-          [(v, out)] -> parse (f v) out
-      )
-
-instance Alternative Parser where
-  -- empty :: Parser a
-  empty = P (\inp -> [])
-
-  -- (<|>) :: Parser a -> Parser a -> Parser a
-  p <|> q =
-    P
-      ( \inp -> case parse p inp of
-          [] -> parse q inp
-          [(v, out)] -> [(v, out)]
-      )
-
--- Checks if given function p satisfies on the next item
-sat :: (Token -> Bool) -> Parser Token
-sat p = do
-  x <- item
-  if p x then return x else empty
+import TokenParser
 
 -- EXPRESSIONS --
 
@@ -94,7 +34,6 @@ termUnaryOp = do
   return $ wrapXML "term" (u : t)
 
 --  EXPRESSION
-
 expr :: Parser [String]
 expr = do
   x <- term
@@ -116,9 +55,9 @@ exprOpTerm = do
 
 exprList :: Parser [String]
 exprList = do
-  e <- expr
-  es <- many exprListMult
-  return $ wrapXML "expressionList" $ concat (e : es)
+  e <- concat <$> many expr
+  es <- concat <$> many exprListMult
+  return $ wrapXML "expressionList" $ e ++ es
 
 exprListMult :: Parser [String]
 exprListMult = do
@@ -127,13 +66,11 @@ exprListMult = do
   return (s : e)
 
 --  OP
-
 op :: Parser String
 op = do
   getWrappedToken <$> sat isOpToken
 
 -- SUBROUTINECALL --
-
 subroutineCall :: Parser [String]
 subroutineCall = do
   s <- subroutineCallByName <|> subSubroutineCall
@@ -152,16 +89,15 @@ subSubroutineCall = do
   n <- getWrappedToken <$> sat isVarNameToken
   p <- getWrappedToken <$> sat (isGivenSymbol ".")
   sr <- subroutineCallByName
-  return $ n : p : sr
+  z <- getWrappedToken <$> sat (isGivenSymbol ";")
+  return $ n : p : sr ++ [z]
 
 -- STATEMENTS --
-
 statements :: Parser [String]
 statements = do
-  letSt <|> ifSt
+  letSt <|> ifSt <|> whileSt <|> doSt <|> returnSt
 
 --  LET STATEMENT
-
 letSt :: Parser [String]
 letSt = do
   k <- getWrappedToken <$> sat (isGivenKeyToken "let")
@@ -173,22 +109,25 @@ letSt = do
   return $ k : x : concat t ++ (y : e) ++ [z]
 
 --  WHILE STATEMENT
-
 whileSt :: Parser [String]
 whileSt = do
-  return ["todo"]
+  w <- getWrappedToken <$> sat (isGivenKeyToken "while")
+  eh <- exprHookOrBrack ("(", ")")
+  ss <- bracketStatements
+  return $ w : eh ++ ss
 
 --  IF STATEMENT
-
 ifSt :: Parser [String]
 ifSt = do
+  -- 'if'
   k <- getWrappedToken <$> sat (isGivenKeyToken "if")
+  -- '( expression )'
   eh <- exprHookOrBrack ("(", ")")
-  hl <- getWrappedToken <$> sat (isGivenSymbol "{")
-  ss <- statements
-  hr <- getWrappedToken <$> sat (isGivenSymbol "}")
+  -- '{ statements }'
+  ss <- bracketStatements
+  -- ( 'else { statements }' )? (0 or 1)
   el <- concat <$> many elseSt
-  return $ k : eh ++ hl : ss ++ hr : el
+  return $ k : eh ++ ss ++ el
 
 elseSt :: Parser [String]
 elseSt = do
@@ -196,49 +135,27 @@ elseSt = do
   ss <- bracketStatements
   return $ k : ss
 
+--  DO STATEMENT
+doSt :: Parser [String]
+doSt = do
+  d <- getWrappedToken <$> sat (isGivenKeyToken "do")
+  sb <- subSubroutineCall
+  return $ wrapXML "doStatement" $ d : sb
+
+--  RETURN STATEMENT
+returnSt :: Parser [String]
+returnSt = do
+  r <- getWrappedToken <$> sat (isGivenKeyToken "return")
+  e <- concat <$> many expr
+  z <- getWrappedToken <$> sat (isGivenSymbol ";")
+  return $ wrapXML "returnStatement" $ r : e ++ [z]
+
 --  STATEMENT HELPER FUNCTIONS
 
+-- '{ statements }'
 bracketStatements :: Parser [String]
 bracketStatements = do
   hl <- getWrappedToken <$> sat (isGivenSymbol "{")
   ss <- statements
   hr <- getWrappedToken <$> sat (isGivenSymbol "}")
   return $ hl : ss ++ [hr]
-
-eval :: [Token] -> [String]
-eval ts = case parse statements ts of
-  [(xs, [])] -> xs
-  [(xs, _)] -> xs
-  [] -> error "Invalid input"
-
--- GENERAL HELPER FUNCTIONS
-
-wrapXML :: String -> [String] -> [String]
-wrapXML s xs = (("<" ++ s ++ ">") : xs) ++ ["</" ++ s ++ ">"]
-
-isTermToken :: Token -> Bool
-isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
-isTermToken (TokInt _) = True
-isTermToken (TokIdent _) = True
-isTermToken (TokStr _) = True
-isTermToken _ = False
-
-isOpToken :: Token -> Bool
-isOpToken (TokSymbol s) = s `elem` ["&lt;", "&gt;", "=", "+", "-", "*", "/", "&amp;", "|"]
-isOpToken _ = False
-
-isGivenKeyToken :: String -> Token -> Bool
-isGivenKeyToken s (TokKey t) = t == s
-isGivenKeyToken _ _ = False
-
-isVarNameToken :: Token -> Bool
-isVarNameToken (TokIdent _) = True
-isVarNameToken _ = False
-
-isGivenSymbol :: String -> Token -> Bool
-isGivenSymbol s (TokSymbol t) = t == s
-isGivenSymbol _ _ = False
-
-isUnaryOpToken :: Token -> Bool
-isUnaryOpToken (TokSymbol s) = s `elem` ["~", "-"]
-isUnaryOpToken _ = False
