@@ -10,25 +10,23 @@ classDec = do
   c <- getWrappedToken <$> sat (isGivenKeyToken "class")
   cn <- getWrappedToken <$> sat isVarNameToken
   hl <- getWrappedToken <$> sat (isGivenSymbol "{")
-  cvd <- concat <$> many (classVarDec <|> subroutineDec)
-  --   srd <- concat <$> many subroutineDec
+  cvd <- concat <$> many classVarDec
+  srd <- concat <$> many subroutineDec
   hr <- getWrappedToken <$> sat (isGivenSymbol "}")
-  return $ wrapXML "class" $ c : cn : hl : cvd ++ [hr] -- srd ++ [hr]
+  return $ wrapXML "class" $ c : cn : hl : cvd ++ srd ++ [hr]
 
 classVarDec :: Parser [String]
 classVarDec = do
-  h <- getWrappedToken <$> sat (isGivenKeyToken "static") <|> getWrappedToken <$> sat (isGivenKeyToken "field")
+  h <- concat <$> many classVarDecHead
   t <- typespec
   vn <- getWrappedToken <$> sat isVarNameToken
-  vnn <- concat <$> many classVarDecHelper
+  vnn <- concat <$> many vardecHelper
   e <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ h : t : vn : vnn
+  return $ wrapXML "classVarDec" $ h : t : vn : vnn ++ [e]
 
-classVarDecHelper :: Parser [String]
-classVarDecHelper = do
-  s <- getWrappedToken <$> sat (isGivenSymbol ",")
-  vn <- getWrappedToken <$> sat isVarNameToken
-  return $ s : [vn]
+classVarDecHead :: Parser String
+classVarDecHead = do
+  getWrappedToken <$> (sat (isGivenKeyToken "static") <|> sat (isGivenKeyToken "field"))
 
 vardec :: Parser [String]
 vardec = do
@@ -37,12 +35,11 @@ vardec = do
   vn <- getWrappedToken <$> sat isVarNameToken
   m <- concat <$> many vardecHelper
   e <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ v : t : vn : m ++ [e]
+  return $ wrapXML "varDec" $ v : t : vn : m ++ [e]
 
 vardecHelper :: Parser [String]
 vardecHelper = do
   s <- getWrappedToken <$> sat (isGivenSymbol ",")
-  t <- typespec
   vn <- getWrappedToken <$> sat isVarNameToken
   return [s, vn]
 
@@ -56,10 +53,10 @@ subroutineDec = do
   t <- subroutineDecType
   n <- getWrappedToken <$> sat isVarNameToken
   pl <- getWrappedToken <$> sat (isGivenSymbol "(")
-  p <- concat <$> many parameterList
+  p <- parameterList
   pr <- getWrappedToken <$> sat (isGivenSymbol ")")
-  --   b <- subroutineBody
-  return $ wrapXML "subroutineDec" $ h : t : n : pl : p ++ [pr] -- ++ b
+  b <- subroutineBody
+  return $ wrapXML "subroutineDec" $ h : t : n : pl : p ++ [pr] ++ b
 
 subroutineDecHead :: Parser String
 subroutineDecHead = do
@@ -79,10 +76,15 @@ subroutineBody = do
 
 parameterList :: Parser [String]
 parameterList = do
+  pl <- concat <$> many parameterListHead
+  return $ wrapXML "parameterList" pl
+
+parameterListHead :: Parser [String]
+parameterListHead = do
   t <- typespec
   vn <- varName
   p <- concat <$> many parameterListHelper
-  return $ wrapXML "parameterlist" $ t : vn : p
+  return $ t : vn : p
 
 parameterListHelper :: Parser [String]
 parameterListHelper = do
@@ -96,7 +98,7 @@ varName = do
   getWrappedToken <$> sat isVarNameToken
 
 eval :: [Token] -> [String]
-eval ts = case parse statements ts of
+eval ts = case parse classDec ts of
   [(xs, [])] -> xs
   [(xs, _)] -> xs
   [] -> error "Invalid input"

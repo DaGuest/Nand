@@ -76,7 +76,12 @@ number c cs =
 comment :: Char -> [Char] -> [Token]
 comment c (c' : cs)
   | c' == '/' = skipTillNewLine cs
+  | c' == '*' = skipTillClosingComment cs
   | otherwise = TokSymbol [c] : tokenize (c' : cs)
+
+skipTillClosingComment :: [Char] -> [Token]
+skipTillClosingComment ('*' : '/' : cs) = tokenize cs
+skipTillClosingComment (_ : cs) = skipTillClosingComment cs
 
 -- A helper function to run though a comment until it encounters a newline symbol or the rest string is empty
 skipTillNewLine :: [Char] -> [Token]

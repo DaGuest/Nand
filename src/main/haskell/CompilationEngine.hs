@@ -9,29 +9,29 @@ import TokenParser
 --  TERM
 term :: Parser [String]
 term = do
-  termExpr <|> termUnaryOp <|> subroutineCall <|> termList <|> termSingle
+  t <- termExpr <|> termUnaryOp <|> subroutineCall <|> termList <|> termSingle
+  return $ wrapXML "term" t
 
 termExpr :: Parser [String]
 termExpr = do
-  e <- exprHookOrBrack ("(", ")")
-  return $ wrapXML "term" e
+  exprHookOrBrack ("(", ")")
 
 termList :: Parser [String]
 termList = do
   v <- getWrappedToken <$> sat isVarNameToken
   e <- exprHookOrBrack ("[", "]")
-  return $ wrapXML "term" (v : e)
+  return (v : e)
 
 termSingle :: Parser [String]
 termSingle = do
   t <- getWrappedToken <$> sat isTermToken
-  return $ wrapXML "term" [t]
+  return [t]
 
 termUnaryOp :: Parser [String]
 termUnaryOp = do
   u <- getWrappedToken <$> sat isUnaryOpToken
   t <- term
-  return $ wrapXML "term" (u : t)
+  return (u : t)
 
 --  EXPRESSION
 expr :: Parser [String]
@@ -73,8 +73,7 @@ op = do
 -- SUBROUTINECALL --
 subroutineCall :: Parser [String]
 subroutineCall = do
-  s <- subroutineCallByName <|> subSubroutineCall
-  return $ wrapXML "subroutineCall" s
+  subroutineCallByName <|> subSubroutineCall
 
 subroutineCallByName :: Parser [String]
 subroutineCallByName = do
@@ -89,12 +88,16 @@ subSubroutineCall = do
   n <- getWrappedToken <$> sat isVarNameToken
   p <- getWrappedToken <$> sat (isGivenSymbol ".")
   sr <- subroutineCallByName
-  z <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ n : p : sr ++ [z]
+  return $ n : p : sr
 
 -- STATEMENTS --
 statements :: Parser [String]
 statements = do
+  s <- concat <$> many statement
+  return $ wrapXML "statements" s
+
+statement :: Parser [String]
+statement = do
   letSt <|> ifSt <|> whileSt <|> doSt <|> returnSt
 
 --  LET STATEMENT
@@ -114,7 +117,7 @@ whileSt = do
   w <- getWrappedToken <$> sat (isGivenKeyToken "while")
   eh <- exprHookOrBrack ("(", ")")
   ss <- bracketStatements
-  return $ w : eh ++ ss
+  return $ wrapXML "whileStatement" $ w : eh ++ ss
 
 --  IF STATEMENT
 ifSt :: Parser [String]
@@ -139,8 +142,9 @@ elseSt = do
 doSt :: Parser [String]
 doSt = do
   d <- getWrappedToken <$> sat (isGivenKeyToken "do")
-  sb <- subSubroutineCall
-  return $ wrapXML "doStatement" $ d : sb
+  sb <- subroutineCall
+  z <- getWrappedToken <$> sat (isGivenSymbol ";")
+  return $ wrapXML "doStatement" $ d : sb ++ [z]
 
 --  RETURN STATEMENT
 returnSt :: Parser [String]
@@ -156,6 +160,6 @@ returnSt = do
 bracketStatements :: Parser [String]
 bracketStatements = do
   hl <- getWrappedToken <$> sat (isGivenSymbol "{")
-  ss <- wrapXML "statements" . concat <$> many statements
+  ss <- statements
   hr <- getWrappedToken <$> sat (isGivenSymbol "}")
   return $ hl : ss ++ [hr]
