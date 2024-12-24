@@ -1,6 +1,9 @@
 #  Nand to Tetris implementations
 
 This is my implementation of project 6,7,8,9 and 10 in the course Nand to Tetris part 2.
+Nand2Tetris is a course where you create a computer starting from a nand chip all the way up to the OS. 
+Part 2 of the course focuses on the software side of the project. The course uses their own specified programming language called Jack.
+The goals in the course are to build an assembler and compiler that can convert Jack code into machine code. The OS is written in the Jack language aswell as a simple program/game to test the working of the whole system. 
 
 ## Objective project 6
 The object was to build an assembly program that can translate Hack assembly code into machine code.
