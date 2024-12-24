@@ -7,7 +7,7 @@ data Token
   = TokSymbol String
   | TokIdent String
   | TokKey String
-  | TokInt Int
+  | TokInt String
   | TokStr String
   deriving (Show, Eq)
 
@@ -26,7 +26,7 @@ tokenize (c : cs)
 -- Get string constant out from between the "" chars.
 strConstant :: [Char] -> [Token]
 strConstant (c : cs) =
-  let (str, _ : cs') = span isAlphaNum cs
+  let (str, _ : cs') = span isStrChar cs
    in TokStr (c : str) : tokenize cs'
 
 -- Identifies multiple character and combines them into a single identifier.
@@ -70,13 +70,18 @@ keywordOrIdent c cs
 number :: Char -> [Char] -> [Token]
 number c cs =
   let (digs, cs') = span isDigit cs
-   in TokInt (read (c : digs)) : tokenize cs'
+   in TokInt (c : digs) : tokenize cs'
 
 -- Identifies a comment.
 comment :: Char -> [Char] -> [Token]
 comment c (c' : cs)
   | c' == '/' = skipTillNewLine cs
+  | c' == '*' = skipTillClosingComment cs
   | otherwise = TokSymbol [c] : tokenize (c' : cs)
+
+skipTillClosingComment :: [Char] -> [Token]
+skipTillClosingComment ('*' : '/' : cs) = tokenize cs
+skipTillClosingComment (_ : cs) = skipTillClosingComment cs
 
 -- A helper function to run though a comment until it encounters a newline symbol or the rest string is empty
 skipTillNewLine :: [Char] -> [Token]
@@ -91,6 +96,11 @@ isAlphaNumUnderscore c
   | c == '_' = True
   | otherwise = isAlphaNum c
 
+isStrChar :: Char -> Bool
+isStrChar c
+  | c == '"' = False
+  | otherwise = True
+
 -- Save symbol in the correct format
 changeSymbol :: Char -> String
 changeSymbol '<' = "&lt;"
@@ -98,3 +108,49 @@ changeSymbol '>' = "&gt;"
 changeSymbol '"' = "&quot;"
 changeSymbol '&' = "&amp;"
 changeSymbol c = [c]
+
+getWrappedToken :: Token -> String
+getWrappedToken (TokIdent s) = "<identifier> " ++ s ++ " </identifier>"
+getWrappedToken (TokKey s) = "<keyword> " ++ s ++ " </keyword>"
+getWrappedToken (TokSymbol s) = "<symbol> " ++ s ++ " </symbol>"
+getWrappedToken (TokStr s) = "<stringConstant> " ++ s ++ " </stringConstant>"
+getWrappedToken (TokInt s) = "<integerConstant> " ++ s ++ " </integerConstant>"
+
+getTokenString :: Token -> String
+getTokenString (TokIdent s) = s
+getTokenString (TokKey s) = s
+getTokenString (TokSymbol s) = s
+getTokenString (TokStr s) = s
+getTokenString (TokInt s) = s
+
+-- GENERAL HELPER FUNCTIONS
+
+wrapXML :: String -> [String] -> [String]
+wrapXML s xs = (("<" ++ s ++ "> ") : xs) ++ [" </" ++ s ++ ">"]
+
+isTermToken :: Token -> Bool
+isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
+isTermToken (TokInt _) = True
+isTermToken (TokIdent _) = True
+isTermToken (TokStr _) = True
+isTermToken _ = False
+
+isOpToken :: Token -> Bool
+isOpToken (TokSymbol s) = s `elem` ["&lt;", "&gt;", "=", "+", "-", "*", "/", "&amp;", "|"]
+isOpToken _ = False
+
+isGivenKeyToken :: String -> Token -> Bool
+isGivenKeyToken s (TokKey t) = t == s
+isGivenKeyToken _ _ = False
+
+isVarNameToken :: Token -> Bool
+isVarNameToken (TokIdent _) = True
+isVarNameToken _ = False
+
+isGivenSymbol :: String -> Token -> Bool
+isGivenSymbol s (TokSymbol t) = t == s
+isGivenSymbol _ _ = False
+
+isUnaryOpToken :: Token -> Bool
+isUnaryOpToken (TokSymbol s) = s `elem` ["~", "-"]
+isUnaryOpToken _ = False
