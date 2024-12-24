@@ -1,6 +1,6 @@
 #  Nand to Tetris implementations
 
-This is my implementation of project 6,7,8 and 9 in the course Nand to Tetris part 2.
+This is my implementation of project 6,7,8,9 and 10 in the course Nand to Tetris part 2.
 
 ## Objective project 6
 The object was to build an assembly program that can translate Hack assembly code into machine code.
@@ -29,3 +29,10 @@ The implementation was made using C++.
 The object was to build a game written in the Jack language.
 I chose a game that forces the player to dodge scrolling walls by moving the players-icon up or down.
 The implementation was made using the Nand Jack language.
+
+## Objective project 10
+The goal was to build the first part of a Jack language compiler.
+This consisted of syntax analyzer that can parse Jack programs according to the Jack grammar.
+The parser consists of two parts: 1. a tokenizer that takes a .jack file and labels all the symbols and word according to the specification. 2. A compiler that parses the tokens into specified XML code.
+The implementation was made using Haskell.
+I chose Haskell because a functional language is considered good for writing compilers because it is easy and efficient to create a parsing tree.
