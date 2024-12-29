@@ -10,7 +10,7 @@ import TokenParser
 classDec :: Parser [String]
 classDec = do
   c <- getWrappedToken <$> sat (isGivenKeyToken "class")
-  cn <- getWrappedToken <$> sat isVarNameToken
+  cn <- className
   hl <- getWrappedToken <$> sat (isGivenSymbol "{")
   cvd <- concat <$> many classVarDec
   srd <- concat <$> many subroutineDec
@@ -22,7 +22,7 @@ classVarDec :: Parser [String]
 classVarDec = do
   h <- concat <$> many classVarDecHead
   t <- typespec
-  vn <- getWrappedToken <$> sat isVarNameToken
+  vn <- varName
   vnn <- concat <$> many vardecHelper
   e <- getWrappedToken <$> sat (isGivenSymbol ";")
   return $ wrapXML "classVarDec" $ h : t : vn : vnn ++ [e]
@@ -37,7 +37,7 @@ vardec :: Parser [String]
 vardec = do
   v <- getWrappedToken <$> sat (isGivenKeyToken "var")
   t <- typespec
-  vn <- getWrappedToken <$> sat isVarNameToken
+  vn <- varName
   m <- concat <$> many vardecHelper
   e <- getWrappedToken <$> sat (isGivenSymbol ";")
   return $ wrapXML "varDec" $ v : t : vn : m ++ [e]
@@ -46,20 +46,20 @@ vardec = do
 vardecHelper :: Parser [String]
 vardecHelper = do
   s <- getWrappedToken <$> sat (isGivenSymbol ",")
-  vn <- getWrappedToken <$> sat isVarNameToken
+  vn <- varName
   return [s, vn]
 
 -- Helper that checks for different type specifications (int,char,boolean of other type)
 typespec :: Parser String
 typespec = do
-  getWrappedToken <$> (sat (isGivenKeyToken "int") <|> sat (isGivenKeyToken "char") <|> sat (isGivenKeyToken "boolean") <|> sat isVarNameToken)
+  getWrappedToken <$> (sat (isGivenKeyToken "int") <|> sat (isGivenKeyToken "char") <|> sat (isGivenKeyToken "boolean")) <|> varName
 
 -- Parses a subroutine declaration
 subroutineDec :: Parser [String]
 subroutineDec = do
   h <- subroutineDecHead
   t <- subroutineDecType
-  n <- getWrappedToken <$> sat isVarNameToken
+  n <- varName
   pl <- getWrappedToken <$> sat (isGivenSymbol "(")
   p <- parameterList
   pr <- getWrappedToken <$> sat (isGivenSymbol ")")
@@ -104,10 +104,15 @@ parameterListHelper :: Parser [String]
 parameterListHelper = do
   s <- getWrappedToken <$> sat (isGivenSymbol ",")
   t <- typespec
-  v <- varName
-  return $ s : t : [v]
+  vn <- varName
+  return $ s : t : [vn]
 
 -- Parses a variable name.
 varName :: Parser String
 varName = do
-  getWrappedToken <$> sat isVarNameToken
+  getWrappedToken <$> sat isIdentToken
+
+-- Parses a class name.
+className :: Parser String
+className = do
+  getWrappedToken <$> sat isIdentToken

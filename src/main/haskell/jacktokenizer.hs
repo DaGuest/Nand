@@ -143,9 +143,9 @@ isGivenKeyToken :: String -> Token -> Bool
 isGivenKeyToken s (TokKey t) = t == s
 isGivenKeyToken _ _ = False
 
-isVarNameToken :: Token -> Bool
-isVarNameToken (TokIdent _) = True
-isVarNameToken _ = False
+isIdentToken :: Token -> Bool
+isIdentToken (TokIdent _) = True
+isIdentToken _ = False
 
 isGivenSymbol :: String -> Token -> Bool
 isGivenSymbol s (TokSymbol t) = t == s

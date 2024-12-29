@@ -18,7 +18,7 @@ termExpr = do
 
 termList :: Parser [String]
 termList = do
-  v <- getWrappedToken <$> sat isVarNameToken
+  v <- getWrappedToken <$> sat isIdentToken
   e <- exprHookOrBrack ("[", "]")
   return (v : e)
 
@@ -77,7 +77,7 @@ subroutineCall = do
 
 subroutineCallByName :: Parser [String]
 subroutineCallByName = do
-  sn <- getWrappedToken <$> sat isVarNameToken
+  sn <- getWrappedToken <$> sat isIdentToken
   pl <- getWrappedToken <$> sat (isGivenSymbol "(")
   el <- exprList
   pr <- getWrappedToken <$> sat (isGivenSymbol ")")
@@ -85,7 +85,7 @@ subroutineCallByName = do
 
 subSubroutineCall :: Parser [String]
 subSubroutineCall = do
-  n <- getWrappedToken <$> sat isVarNameToken
+  n <- getWrappedToken <$> sat isIdentToken
   p <- getWrappedToken <$> sat (isGivenSymbol ".")
   sr <- subroutineCallByName
   return $ n : p : sr

@@ -19,12 +19,12 @@ statement = do
 letSt :: Parser [String]
 letSt = do
   k <- getWrappedToken <$> sat (isGivenKeyToken "let")
-  x <- getWrappedToken <$> sat isVarNameToken
-  t <- many $ exprHookOrBrack ("[", "]")
+  vn <- getWrappedToken <$> sat isIdentToken
+  eh <- many $ exprHookOrBrack ("[", "]")
   y <- getWrappedToken <$> sat (isGivenSymbol "=")
   e <- expr
   z <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ wrapXML "letStatement" $ k : x : concat t ++ (y : e) ++ [z]
+  return $ wrapXML "letStatement" $ k : vn : concat eh ++ (y : e) ++ [z]
 
 --  WHILE STATEMENT
 whileSt :: Parser [String]
@@ -37,13 +37,9 @@ whileSt = do
 --  IF STATEMENT
 ifSt :: Parser [String]
 ifSt = do
-  -- 'if'
   k <- getWrappedToken <$> sat (isGivenKeyToken "if")
-  -- '( expression )'
   eh <- exprHookOrBrack ("(", ")")
-  -- '{ statements }'
   ss <- bracketStatements
-  -- ( 'else { statements }' )? (0 or 1)
   el <- concat <$> many elseSt
   return $ wrapXML "ifStatement" $ k : eh ++ ss ++ el
 
