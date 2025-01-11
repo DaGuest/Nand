@@ -44,7 +44,7 @@ exprHookOrBrack t = do
   pl <- getWrappedToken <$> sat (isGivenSymbol $ fst t)
   e <- expr
   pr <- getWrappedToken <$> sat (isGivenSymbol $ snd t)
-  return $ (pl : e) ++ [pr]
+  return e
 
 exprOpTerm :: Parser [String]
 exprOpTerm = do
