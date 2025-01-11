@@ -44,7 +44,7 @@ exprHookOrBrack t = do
   pl <- getWrappedToken <$> sat (isGivenSymbol $ fst t)
   e <- expr
   pr <- getWrappedToken <$> sat (isGivenSymbol $ snd t)
-  return $ (pl : e) ++ [pr]
+  return e
 
 exprOpTerm :: Parser [String]
 exprOpTerm = do
@@ -105,6 +105,11 @@ compileOpTerm (TokSymbol s)
   | s == "-" = "sub "
   | s == "<" = "lt "
   | s == ">" = "gt "
+  | s == "*" = "call Math.multiply 2"
+  | s == "/" = "call Math.divide 2"
+  | s == "|" = "or "
+  | s == "&" = "and "
+  | s == "=" = "eq "
 
 compileSubsubroutineCall :: String -> [String] -> [String]
 compileSubsubroutineCall prefix (x : xs) = (prefix ++ x) : xs
