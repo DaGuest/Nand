@@ -15,7 +15,7 @@ tokenize :: String -> [Token]
 tokenize [] = []
 tokenize (c : cs)
   | c == '/' = comment c cs
-  | c `elem` "+-*/&|<>=~{}()[].,;" = TokSymbol (changeSymbol c) : tokenize cs
+  | c `elem` "+-*/&|<>=~{}()[].,;" = TokSymbol [c] : tokenize cs
   | c == '"' = strConstant cs
   | isDigit c = number c cs
   | isAlpha c = keywordOrIdent c cs
@@ -101,14 +101,6 @@ isStrChar c
   | c == '"' = False
   | otherwise = True
 
--- Save symbol in the correct format
-changeSymbol :: Char -> String
-changeSymbol '<' = "&lt;"
-changeSymbol '>' = "&gt;"
-changeSymbol '"' = "&quot;"
-changeSymbol '&' = "&amp;"
-changeSymbol c = [c]
-
 getWrappedToken :: Token -> String
 getWrappedToken (TokIdent s) = "<identifier> " ++ s ++ " </identifier>"
 getWrappedToken (TokKey s) = "<keyword> " ++ s ++ " </keyword>"
@@ -136,7 +128,7 @@ isTermToken (TokIdent _) = True
 isTermToken _ = False
 
 isOpToken :: Token -> Bool
-isOpToken (TokSymbol s) = s `elem` ["&lt;", "&gt;", "=", "+", "-", "*", "/", "&amp;", "|"]
+isOpToken (TokSymbol s) = s `elem` ["<", ">", "=", "+", "-", "*", "/", "&", "|"]
 isOpToken _ = False
 
 isGivenKeyToken :: String -> Token -> Bool

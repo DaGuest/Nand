@@ -105,6 +105,11 @@ compileOpTerm (TokSymbol s)
   | s == "-" = "sub "
   | s == "<" = "lt "
   | s == ">" = "gt "
+  | s == "*" = "call Math.multiply 2"
+  | s == "/" = "call Math.divide 2"
+  | s == "|" = "or "
+  | s == "&" = "and "
+  | s == "=" = "eq "
 
 compileSubsubroutineCall :: String -> [String] -> [String]
 compileSubsubroutineCall prefix (x : xs) = (prefix ++ x) : xs
