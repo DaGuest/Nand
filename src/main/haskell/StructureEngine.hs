@@ -20,17 +20,13 @@ classDec = do
 -- Helper that takes care of variable declaration inside classes
 classVarDec :: Parser [String]
 classVarDec = do
-  h <- concat <$> many classVarDecHead
+  -- list of class variable declarations
+  h <- getWrappedToken <$> (sat (isGivenKeyToken "static") <|> sat (isGivenKeyToken "field"))
   t <- typespec
   vn <- varName
   vnn <- concat <$> many vardecHelper
   e <- getWrappedToken <$> sat (isGivenSymbol ";")
   return $ wrapXML "classVarDec" $ h : t : vn : vnn ++ [e]
-
--- Helper for class variable declaration that determines static or field is given
-classVarDecHead :: Parser String
-classVarDecHead = do
-  getWrappedToken <$> (sat (isGivenKeyToken "static") <|> sat (isGivenKeyToken "field"))
 
 -- Parses variable declaration inside subroutines
 vardec :: Parser [String]

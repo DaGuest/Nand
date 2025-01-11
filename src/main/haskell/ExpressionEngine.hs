@@ -9,8 +9,7 @@ import TokenParser
 --  TERM
 term :: Parser [String]
 term = do
-  t <- termExpr <|> termUnaryOp <|> subroutineCall <|> termList <|> termSingle
-  return $ wrapXML "term" t
+  termExpr <|> termUnaryOp <|> subroutineCall <|> termList <|> termSingle
 
 termExpr :: Parser [String]
 termExpr = do
@@ -24,21 +23,21 @@ termList = do
 
 termSingle :: Parser [String]
 termSingle = do
-  t <- getWrappedToken <$> sat isTermToken
+  t <- compileSingleTerm <$> sat isTermToken
   return [t]
 
 termUnaryOp :: Parser [String]
 termUnaryOp = do
-  u <- getWrappedToken <$> sat isUnaryOpToken
+  u <- compileUnaryOpTerm <$> sat isUnaryOpToken
   t <- term
-  return (u : t)
+  return (t ++ [u])
 
 --  EXPRESSION
 expr :: Parser [String]
 expr = do
   x <- term
   y <- many exprOpTerm
-  return $ wrapXML "expression" $ concat (x : y)
+  return $ concat (x : y)
 
 exprHookOrBrack :: (String, String) -> Parser [String]
 exprHookOrBrack t = do
@@ -49,43 +48,66 @@ exprHookOrBrack t = do
 
 exprOpTerm :: Parser [String]
 exprOpTerm = do
-  x <- op
-  z <- term
-  return $ x : z
+  o <- op
+  t <- term
+  return $ t ++ [o]
 
-exprList :: Parser [String]
+exprList :: Parser [[String]]
 exprList = do
-  e <- concat <$> many expr
-  es <- concat <$> many exprListMult
-  return $ wrapXML "expressionList" $ e ++ es
+  e <- many expr
+  es <- many exprListMult
+  return $ e ++ es
 
 exprListMult :: Parser [String]
 exprListMult = do
-  s <- getWrappedToken <$> sat (isGivenSymbol ",")
-  e <- expr
-  return (s : e)
+  sat (isGivenSymbol ",")
+  expr
 
 --  OP
 op :: Parser String
 op = do
-  getWrappedToken <$> sat isOpToken
+  compileOpTerm <$> sat isOpToken
 
 -- SUBROUTINECALL --
 subroutineCall :: Parser [String]
 subroutineCall = do
-  subroutineCallByName <|> subSubroutineCall
+  s <- subroutineCallByName <|> subSubroutineCall
+  return $ compileSubroutineCall s
 
 subroutineCallByName :: Parser [String]
 subroutineCallByName = do
-  sn <- getWrappedToken <$> sat isIdentToken
-  pl <- getWrappedToken <$> sat (isGivenSymbol "(")
+  sn <- getTokenString <$> sat isIdentToken
+  sat (isGivenSymbol "(")
   el <- exprList
-  pr <- getWrappedToken <$> sat (isGivenSymbol ")")
-  return $ (sn : pl : el) ++ [pr]
+  sat (isGivenSymbol ")")
+  return $ (sn ++ " " ++ show (length el)) : concat el
 
 subSubroutineCall :: Parser [String]
 subSubroutineCall = do
-  n <- getWrappedToken <$> sat isIdentToken
-  p <- getWrappedToken <$> sat (isGivenSymbol ".")
-  sr <- subroutineCallByName
-  return $ n : p : sr
+  n <- getTokenString <$> sat isIdentToken
+  p <- getTokenString <$> sat (isGivenSymbol ".")
+  compileSubsubroutineCall (n ++ p) <$> subroutineCallByName
+
+--  COMPILER FUNCTIONS --
+
+compileSingleTerm :: Token -> String
+compileSingleTerm (TokIdent s) = "push " ++ s
+compileSingleTerm (TokInt i) = "push " ++ i
+compileSingleTerm _ = "ERROR"
+
+compileUnaryOpTerm :: Token -> String
+compileUnaryOpTerm (TokSymbol "~") = "not "
+compileUnaryOpTerm (TokSymbol "-") = "neg "
+
+compileOpTerm :: Token -> String
+compileOpTerm (TokSymbol s)
+  | s == "+" = "add "
+  | s == "-" = "sub "
+  | s == "<" = "lt "
+  | s == ">" = "gt "
+
+compileSubsubroutineCall :: String -> [String] -> [String]
+compileSubsubroutineCall prefix (x : xs) = (prefix ++ x) : xs
+
+compileSubroutineCall :: [String] -> [String]
+compileSubroutineCall (x : xs) = xs ++ ["call " ++ x]

@@ -9,7 +9,7 @@ data Token
   | TokKey String
   | TokInt String
   | TokStr String
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 tokenize :: String -> [Token]
 tokenize [] = []
@@ -129,10 +129,10 @@ wrapXML :: String -> [String] -> [String]
 wrapXML s xs = (("<" ++ s ++ "> ") : xs) ++ [" </" ++ s ++ ">"]
 
 isTermToken :: Token -> Bool
-isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
+-- isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
 isTermToken (TokInt _) = True
 isTermToken (TokIdent _) = True
-isTermToken (TokStr _) = True
+-- isTermToken (TokStr _) = True
 isTermToken _ = False
 
 isOpToken :: Token -> Bool
