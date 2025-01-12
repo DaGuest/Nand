@@ -28,10 +28,10 @@ letSt = do
 --  WHILE STATEMENT
 whileSt :: Parser [String]
 whileSt = do
-  w <- getWrappedToken <$> sat (isGivenKeyToken "while")
+  sat (isGivenKeyToken "while")
   eh <- exprHookOrBrack ("(", ")")
   ss <- bracketStatements
-  return $ wrapXML "whileStatement" $ w : eh ++ ss
+  return $ "label WHILE-ENTRY-LABEL" : eh ++ ["not", "if-goto WHILE-EXIT-LABEL"] ++ ss ++ ["goto WHILE-ENTRY-LABEL", "WHILE-EXIT-LABEL"]
 
 --  IF STATEMENT
 ifSt :: Parser [String]
