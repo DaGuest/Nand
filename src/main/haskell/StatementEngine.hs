@@ -31,7 +31,7 @@ whileSt = do
   sat (isGivenKeyToken "while")
   eh <- exprHookOrBrack ("(", ")")
   ss <- bracketStatements
-  return $ "label WHILE-ENTRY-LABEL" : eh ++ ["not", "if-goto WHILE-EXIT-LABEL"] ++ ss ++ ["goto WHILE-ENTRY-LABEL", "WHILE-EXIT-LABEL"]
+  return $ "label WHILE_EXP" : eh ++ ["not", "if-goto WHILE_END"] ++ ss ++ ["goto WHILE_EXP", "label WHILE_END"]
 
 --  IF STATEMENT
 ifSt :: Parser [String]
@@ -40,7 +40,7 @@ ifSt = do
   eh <- exprHookOrBrack ("(", ")")
   ss <- bracketStatements
   el <- concat <$> many elseSt
-  return $ eh ++ ["not", "if-goto IF-LABEL"] ++ ss ++ ["goto ELSE-LABEL", "IF-LABEL"] ++ el ++ ["ELSE-LABEL"]
+  return $ eh ++ ["not", "if-goto IF_FALSE"] ++ ss ++ ["goto IF_END", "label IF_FALSE"] ++ el ++ ["label IF_END"]
 
 elseSt :: Parser [String]
 elseSt = do
