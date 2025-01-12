@@ -52,10 +52,10 @@ elseSt = do
 --  DO STATEMENT
 doSt :: Parser [String]
 doSt = do
-  d <- getWrappedToken <$> sat (isGivenKeyToken "do")
+  getWrappedToken <$> sat (isGivenKeyToken "do")
   sb <- subroutineCall
-  z <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ wrapXML "doStatement" $ d : sb ++ [z]
+  getWrappedToken <$> sat (isGivenSymbol ";")
+  return $ sb ++ ["pop temp 0"]
 
 --  RETURN STATEMENT
 returnSt :: Parser [String]
