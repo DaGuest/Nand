@@ -8,8 +8,7 @@ import TokenParser
 -- STATEMENTS --
 statements :: Parser [String]
 statements = do
-  s <- concat <$> many statement
-  return $ wrapXML "statements" s
+  concat <$> many statement
 
 statement :: Parser [String]
 statement = do
@@ -18,12 +17,12 @@ statement = do
 --  LET STATEMENT
 letSt :: Parser [String]
 letSt = do
-  getWrappedToken <$> sat (isGivenKeyToken "let")
+  sat (isGivenKeyToken "let")
   vn <- getTokenString <$> sat isIdentToken
   eh <- many $ exprHookOrBrack ("[", "]") -- Aanpassen want dit zorgt voor een 'push _' output
-  getWrappedToken <$> sat (isGivenSymbol "=")
+  sat (isGivenSymbol "=")
   e <- expr
-  getWrappedToken <$> sat (isGivenSymbol ";")
+  sat (isGivenSymbol ";")
   return $ e ++ ["pop " ++ vn]
 
 --  WHILE STATEMENT
@@ -37,32 +36,31 @@ whileSt = do
 --  IF STATEMENT
 ifSt :: Parser [String]
 ifSt = do
-  k <- getWrappedToken <$> sat (isGivenKeyToken "if")
+  sat (isGivenKeyToken "if")
   eh <- exprHookOrBrack ("(", ")")
   ss <- bracketStatements
   el <- concat <$> many elseSt
-  return $ wrapXML "ifStatement" $ k : eh ++ ss ++ el
+  return $ eh ++ ["not", "if-goto IF-LABEL"] ++ ss ++ ["goto ELSE-LABEL", "IF-LABEL"] ++ el ++ ["ELSE-LABEL"]
 
 elseSt :: Parser [String]
 elseSt = do
-  k <- getWrappedToken <$> sat (isGivenKeyToken "else")
-  ss <- bracketStatements
-  return $ k : ss
+  sat (isGivenKeyToken "else")
+  bracketStatements
 
 --  DO STATEMENT
 doSt :: Parser [String]
 doSt = do
-  getWrappedToken <$> sat (isGivenKeyToken "do")
+  sat (isGivenKeyToken "do")
   sb <- subroutineCall
-  getWrappedToken <$> sat (isGivenSymbol ";")
+  sat (isGivenSymbol ";")
   return $ sb ++ ["pop temp 0"]
 
 --  RETURN STATEMENT
 returnSt :: Parser [String]
 returnSt = do
-  getWrappedToken <$> sat (isGivenKeyToken "return")
+  sat (isGivenKeyToken "return")
   e <- returnCheckZero . concat <$> many expr
-  getWrappedToken <$> sat (isGivenSymbol ";")
+  sat (isGivenSymbol ";")
   return e
 
 --  STATEMENT HELPER FUNCTIONS
@@ -70,10 +68,10 @@ returnSt = do
 -- '{ statements }'
 bracketStatements :: Parser [String]
 bracketStatements = do
-  hl <- getWrappedToken <$> sat (isGivenSymbol "{")
+  sat (isGivenSymbol "{")
   ss <- statements
-  hr <- getWrappedToken <$> sat (isGivenSymbol "}")
-  return $ hl : ss ++ [hr]
+  sat (isGivenSymbol "}")
+  return ss
 
 returnCheckZero :: [String] -> [String]
 returnCheckZero [] = ["push constant 0", "return"]
