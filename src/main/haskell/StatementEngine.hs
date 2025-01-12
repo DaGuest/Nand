@@ -18,13 +18,13 @@ statement = do
 --  LET STATEMENT
 letSt :: Parser [String]
 letSt = do
-  k <- getWrappedToken <$> sat (isGivenKeyToken "let")
-  vn <- getWrappedToken <$> sat isIdentToken
-  eh <- many $ exprHookOrBrack ("[", "]")
-  y <- getWrappedToken <$> sat (isGivenSymbol "=")
+  getWrappedToken <$> sat (isGivenKeyToken "let")
+  vn <- getTokenString <$> sat isIdentToken
+  eh <- many $ exprHookOrBrack ("[", "]") -- Aanpassen want dit zorgt voor een 'push _' output
+  getWrappedToken <$> sat (isGivenSymbol "=")
   e <- expr
-  z <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ wrapXML "letStatement" $ k : vn : concat eh ++ (y : e) ++ [z]
+  getWrappedToken <$> sat (isGivenSymbol ";")
+  return $ e ++ ["pop " ++ vn]
 
 --  WHILE STATEMENT
 whileSt :: Parser [String]
@@ -60,10 +60,10 @@ doSt = do
 --  RETURN STATEMENT
 returnSt :: Parser [String]
 returnSt = do
-  r <- getWrappedToken <$> sat (isGivenKeyToken "return")
-  e <- concat <$> many expr
-  z <- getWrappedToken <$> sat (isGivenSymbol ";")
-  return $ wrapXML "returnStatement" $ r : e ++ [z]
+  getWrappedToken <$> sat (isGivenKeyToken "return")
+  e <- returnCheckZero . concat <$> many expr
+  getWrappedToken <$> sat (isGivenSymbol ";")
+  return e
 
 --  STATEMENT HELPER FUNCTIONS
 
@@ -74,3 +74,7 @@ bracketStatements = do
   ss <- statements
   hr <- getWrappedToken <$> sat (isGivenSymbol "}")
   return $ hl : ss ++ [hr]
+
+returnCheckZero :: [String] -> [String]
+returnCheckZero [] = ["push constant 0", "return"]
+returnCheckZero e = e ++ ["return"]
