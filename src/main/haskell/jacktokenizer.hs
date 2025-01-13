@@ -121,7 +121,7 @@ wrapXML :: String -> [String] -> [String]
 wrapXML s xs = (("<" ++ s ++ "> ") : xs) ++ [" </" ++ s ++ ">"]
 
 isTermToken :: Token -> Bool
--- isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
+isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
 isTermToken (TokInt _) = True
 isTermToken (TokIdent _) = True
 -- isTermToken (TokStr _) = True

@@ -93,6 +93,7 @@ subSubroutineCall = do
 compileSingleTerm :: Token -> String
 compileSingleTerm (TokIdent s) = "push " ++ s
 compileSingleTerm (TokInt i) = "push constant " ++ i
+compileSingleTerm (TokKey "this") = "push pointer 0"
 compileSingleTerm _ = "ERROR"
 
 compileUnaryOpTerm :: Token -> String

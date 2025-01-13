@@ -48,38 +48,35 @@ vardecHelper = do
 -- Helper that checks for different type specifications (int,char,boolean of other type)
 typespec :: Parser String
 typespec = do
-  getWrappedToken <$> (sat (isGivenKeyToken "int") <|> sat (isGivenKeyToken "char") <|> sat (isGivenKeyToken "boolean")) <|> varName
+  getTokenString <$> (sat (isGivenKeyToken "int") <|> sat (isGivenKeyToken "char") <|> sat (isGivenKeyToken "boolean")) <|> varName
 
 -- Parses a subroutine declaration
 subroutineDec :: Parser [String]
 subroutineDec = do
+  -- Method or constructor head
   h <- subroutineDecHead
   t <- subroutineDecType
   n <- varName
-  pl <- getWrappedToken <$> sat (isGivenSymbol "(")
+  -- Parameters for the function
+  sat (isGivenSymbol "(")
   p <- parameterList
-  pr <- getWrappedToken <$> sat (isGivenSymbol ")")
-  b <- subroutineBody
-  return $ wrapXML "subroutineDec" $ h : t : n : pl : p ++ [pr] ++ b
+  sat (isGivenSymbol ")")
+  sat (isGivenSymbol "{")
+  -- Subroutine body
+  v <- many vardec
+  ss <- statements
+  sat (isGivenSymbol "}")
+  return $ compileSubroutine h t n (length v) ++ p ++ concat v ++ ss
 
 -- Helper for subroutine declaration that checks the head of the subroutine declaration (constructor, function or method)
 subroutineDecHead :: Parser String
 subroutineDecHead = do
-  getWrappedToken <$> (sat (isGivenKeyToken "constructor") <|> sat (isGivenKeyToken "function") <|> sat (isGivenKeyToken "method"))
+  getTokenString <$> (sat (isGivenKeyToken "constructor") <|> sat (isGivenKeyToken "function") <|> sat (isGivenKeyToken "method"))
 
 -- Helper to check the given subroutine type
 subroutineDecType :: Parser String
 subroutineDecType = do
-  (getWrappedToken <$> sat (isGivenKeyToken "void")) <|> typespec
-
--- Parses the subroutine body
-subroutineBody :: Parser [String]
-subroutineBody = do
-  hl <- getWrappedToken <$> sat (isGivenSymbol "{")
-  v <- many vardec
-  ss <- statements
-  hr <- getWrappedToken <$> sat (isGivenSymbol "}")
-  return $ wrapXML "subroutineBody" $ hl : concat v ++ ss ++ [hr]
+  (getTokenString <$> sat (isGivenKeyToken "void")) <|> typespec
 
 -- Parses zero or multiple parameters declared in the subroutine title
 parameterList :: Parser [String]
@@ -106,9 +103,15 @@ parameterListHelper = do
 -- Parses a variable name.
 varName :: Parser String
 varName = do
-  getWrappedToken <$> sat isIdentToken
+  getTokenString <$> sat isIdentToken
 
 -- Parses a class name.
 className :: Parser String
 className = do
   getWrappedToken <$> sat isIdentToken
+
+--  COMPILER FUNCTIONS --
+
+compileSubroutine :: String -> String -> String -> Int -> [String]
+compileSubroutine "constructor" t v varlength = ["function " ++ t ++ "." ++ v ++ " " ++ show varlength, "call Memory.alloc 1", "pop pointer 0"]
+compileSubroutine "method" t v varlength = ["function " ++ "." ++ v ++ " " ++ show varlength, "push argument 0", "pop pointer 0"]
