@@ -17,9 +17,9 @@ termExpr = do
 
 termList :: Parser [String]
 termList = do
-  v <- getWrappedToken <$> sat isIdentToken
-  e <- exprHookOrBrack ("[", "]")
-  return (v : e)
+  v <- compileSingleTerm <$> sat isIdentToken
+  e <- exprHook
+  return $ (v : e) ++ ["add", "pop pointer 1", "push that 0"]
 
 termSingle :: Parser [String]
 termSingle = do
@@ -44,6 +44,13 @@ exprHookOrBrack t = do
   sat (isGivenSymbol $ fst t)
   e <- expr
   sat (isGivenSymbol $ snd t)
+  return e
+
+exprHook :: Parser [String]
+exprHook = do
+  sat (isGivenSymbol "[")
+  e <- expr
+  sat (isGivenSymbol "]")
   return e
 
 exprOpTerm :: Parser [String]
@@ -86,7 +93,7 @@ subSubroutineCall :: Parser [String]
 subSubroutineCall = do
   n <- getTokenString <$> sat isIdentToken
   p <- getTokenString <$> sat (isGivenSymbol ".")
-  compileSubsubroutineCall (n ++ p) <$> subroutineCallByName
+  compileSubsubroutineCall (n ++ p) <$> (subroutineCallByName <|> subSubroutineCall)
 
 --  COMPILER FUNCTIONS --
 

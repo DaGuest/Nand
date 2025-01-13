@@ -19,11 +19,11 @@ letSt :: Parser [String]
 letSt = do
   sat (isGivenKeyToken "let")
   vn <- getTokenString <$> sat isIdentToken
-  eh <- many $ exprHookOrBrack ("[", "]") -- Aanpassen want dit zorgt voor een 'push _' output
+  eh <- concat <$> many exprHook
   sat (isGivenSymbol "=")
   e <- expr
   sat (isGivenSymbol ";")
-  return $ e ++ ["pop " ++ vn]
+  return $ compileLet vn eh e
 
 --  WHILE STATEMENT
 whileSt :: Parser [String]
@@ -73,6 +73,12 @@ bracketStatements = do
   sat (isGivenSymbol "}")
   return ss
 
+--  COMPILER FUNCTIONS --
+
 returnCheckZero :: [String] -> [String]
 returnCheckZero [] = ["push constant 0", "return"]
 returnCheckZero e = e ++ ["return"]
+
+compileLet :: String -> [String] -> [String] -> [String]
+compileLet vn [] e = e ++ ["pop " ++ vn]
+compileLet vn eh e = ["push " ++ vn] ++ eh ++ e ++ ["pop temp 0", "pop pointer 1", "push temp 0", "pop that 0"]
