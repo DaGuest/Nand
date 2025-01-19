@@ -67,7 +67,7 @@ subroutineDec st cn = do
   v <- createEntryTable . addLabel "local" . concat <$> many vardec
   ss <- map (replaceClassType (v ++ p ++ st) cn) . replaceVar (v ++ p ++ st) <$> statements
   sat (isGivenSymbol "}")
-  return $ compileSubroutine h cn t n (length v) (length p) ++ ss
+  return $ compileSubroutine h cn t n (length v) (length p) (length $ filter (\(_, _, k, _) -> k == "this") st) ++ ss
 
 -- Helper for subroutine declaration that checks the head of the subroutine declaration (constructor, function or method)
 subroutineDecHead :: Parser String
@@ -113,9 +113,10 @@ className = do
 
 --  COMPILER FUNCTIONS --
 
-compileSubroutine :: String -> String -> String -> String -> Int -> Int -> [String]
-compileSubroutine "constructor" cn t v varlength argLength = ["function " ++ t ++ "." ++ v ++ " " ++ show varlength, "push constant " ++ show argLength, "call Memory.alloc 1", "pop pointer 0"]
-compileSubroutine "method" cn t v varlength argLength = ["function " ++ cn ++ "." ++ v ++ " " ++ show varlength, "push argument 0", "pop pointer 0"]
+compileSubroutine :: String -> String -> String -> String -> Int -> Int -> Int -> [String]
+compileSubroutine "constructor" cn t v varlength argLength cargLength = ["function " ++ t ++ "." ++ v ++ " " ++ show varlength, "push constant " ++ show cargLength, "call Memory.alloc 1", "pop pointer 0"]
+compileSubroutine "method" cn t v varlength argLength _ = ["function " ++ cn ++ "." ++ v ++ " " ++ show varlength, "push argument 0", "pop pointer 0"]
+compileSubroutine "function" cn t v varlength argLength cargLength = ["function " ++ cn ++ "." ++ v ++ " " ++ show varlength]
 
 addObjectToParameter :: String -> [String] -> [String]
 addObjectToParameter "method" cs = "this" : cs

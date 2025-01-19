@@ -124,7 +124,7 @@ isTermToken :: Token -> Bool
 isTermToken (TokKey t) = t `elem` ["true", "false", "null", "this"]
 isTermToken (TokInt _) = True
 isTermToken (TokIdent _) = True
--- isTermToken (TokStr _) = True
+isTermToken (TokStr _) = True
 isTermToken _ = False
 
 isOpToken :: Token -> Bool

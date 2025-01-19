@@ -66,12 +66,17 @@ getIndex (_, _, _, i) = i
 replaceClassType :: [Entry] -> String -> String -> String
 replaceClassType ts cn s
   | isPrefixOf "call" s && (length (split s '.') == 1) = let varName = head $ split (head $ tail $ words s) '.' in getTypeName varName ts s cn
+  | isPrefixOf "call" s && (length (split s '.') > 1) = let varName = head $ split (head $ tail $ words $ head (split s '.')) '.' in getTypeUpper varName ts s
   | otherwise = s
 
 getTypeName :: String -> [Entry] -> String -> String -> String
 getTypeName varName ts orig cn
   | lookUpVar varName ts == [] = addClassNameToCall orig cn
   | otherwise = "call " ++ getType (head $ lookUpVar varName ts) ++ "." ++ last (split varName '.')
+
+getTypeUpper varName ts orig
+  | lookUpVar varName ts == [] = orig
+  | otherwise = "call " ++ getType (head $ lookUpVar varName ts) ++ "." ++ last (split orig '.')
 
 addClassNameToCall :: String -> String -> String
 addClassNameToCall com cn = let wordList = words com in concat $ head wordList : " " : cn : "." : [unwords (tail wordList)]

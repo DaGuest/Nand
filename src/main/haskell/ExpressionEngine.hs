@@ -1,6 +1,7 @@
 module ExpressionEngine where
 
 import Control.Applicative
+import Data.Char (isLower, isUpper, ord)
 import JackTokenizer
 import SymbolTable
 import TokenParser
@@ -104,6 +105,7 @@ compileSingleTerm (TokKey "this") = ["push pointer 0"]
 compileSingleTerm (TokKey "true") = ["push constant 0", "not"]
 compileSingleTerm (TokKey "false") = ["push constant 0"]
 compileSingleTerm (TokKey "null") = ["push constant 0"]
+compileSingleTerm (TokStr s) = compileStringConstant s
 compileSingleTerm _ = ["ERROR"]
 
 compileUnaryOpTerm :: Token -> String
@@ -128,9 +130,17 @@ compileSubsubroutineCall prefix (x : xs) = (prefix ++ x) : xs
 compileSubroutineCall :: [String] -> [String]
 compileSubroutineCall (x : xs) = let (a : as) = addTarget x in as ++ xs ++ [a]
 
+compileStringConstant s = ["push constant " ++ show (length s), "call String.new 1"] ++ concatMap compileSingleStringConstant s
+
+compileSingleStringConstant :: Char -> [String]
+compileSingleStringConstant c = ["push constant " ++ show (ord c), "call String.appendChar 2"]
+
+addTarget :: String -> [String]
 addTarget s
-  | length (split s '.') > 1 && head (split s '.') `elem` ["Memory", "Math", "String", "Screen"] = ["call " ++ s]
-  | length (split s '.') > 1 = ["call " ++ addOne s, "push " ++ head (split s '.')]
+  | length (split s '.') > 1 && head (split s '.') `elem` ["Memory", "Math", "String", "Screen", "Output", "Keyboard", "Array", "Sys"] = ["call " ++ s]
+  | length (split s '.') > 1 && isLower (head $ head (split s '.')) = ["call " ++ addOne s, "push " ++ head (split s '.')]
+  | length (split s '.') > 1 && isUpper (head $ head (split s '.')) = ["call " ++ s]
   | otherwise = ["call " ++ addOne s, "push pointer 0"]
 
+addOne :: String -> String
 addOne s = let sp = show ((read (last $ words s) :: Integer) + 1) in unwords $ reverse (sp : tail (reverse $ words s))
