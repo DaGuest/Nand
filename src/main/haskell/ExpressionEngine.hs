@@ -2,6 +2,7 @@ module ExpressionEngine where
 
 import Control.Applicative
 import JackTokenizer
+import SymbolTable
 import TokenParser
 
 -- EXPRESSIONS --
@@ -19,12 +20,11 @@ termList :: Parser [String]
 termList = do
   v <- compileSingleTerm <$> sat isIdentToken
   e <- exprHook
-  return $ (v : e) ++ ["add", "pop pointer 1", "push that 0"]
+  return $ (v ++ e) ++ ["add", "pop pointer 1", "push that 0"]
 
 termSingle :: Parser [String]
 termSingle = do
-  t <- compileSingleTerm <$> sat isTermToken
-  return [t]
+  compileSingleTerm <$> sat isTermToken
 
 termUnaryOp :: Parser [String]
 termUnaryOp = do
@@ -97,11 +97,14 @@ subSubroutineCall = do
 
 --  COMPILER FUNCTIONS --
 
-compileSingleTerm :: Token -> String
-compileSingleTerm (TokIdent s) = "push " ++ s
-compileSingleTerm (TokInt i) = "push constant " ++ i
-compileSingleTerm (TokKey "this") = "push pointer 0"
-compileSingleTerm _ = "ERROR"
+compileSingleTerm :: Token -> [String]
+compileSingleTerm (TokIdent s) = ["push " ++ s]
+compileSingleTerm (TokInt i) = ["push constant " ++ i]
+compileSingleTerm (TokKey "this") = ["push pointer 0"]
+compileSingleTerm (TokKey "true") = ["push constant 0", "not"]
+compileSingleTerm (TokKey "false") = ["push constant 0"]
+compileSingleTerm (TokKey "null") = ["push constant 0"]
+compileSingleTerm _ = ["ERROR"]
 
 compileUnaryOpTerm :: Token -> String
 compileUnaryOpTerm (TokSymbol "~") = "not "
@@ -123,4 +126,11 @@ compileSubsubroutineCall :: String -> [String] -> [String]
 compileSubsubroutineCall prefix (x : xs) = (prefix ++ x) : xs
 
 compileSubroutineCall :: [String] -> [String]
-compileSubroutineCall (x : xs) = xs ++ ["call " ++ x]
+compileSubroutineCall (x : xs) = let (a : as) = addTarget x in as ++ xs ++ [a]
+
+addTarget s
+  | length (split s '.') > 1 && head (split s '.') `elem` ["Memory", "Math", "String", "Screen"] = ["call " ++ s]
+  | length (split s '.') > 1 = ["call " ++ addOne s, "push " ++ head (split s '.')]
+  | otherwise = ["call " ++ addOne s, "push pointer 0"]
+
+addOne s = let sp = show ((read (last $ words s) :: Integer) + 1) in unwords $ reverse (sp : tail (reverse $ words s))

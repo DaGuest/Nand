@@ -59,9 +59,9 @@ doSt = do
 returnSt :: Parser [String]
 returnSt = do
   sat (isGivenKeyToken "return")
-  e <- returnCheckZero . concat <$> many expr
+  e <- concat <$> many expr
   sat (isGivenSymbol ";")
-  return e
+  return $ compileReturn e
 
 --  STATEMENT HELPER FUNCTIONS
 
@@ -75,9 +75,9 @@ bracketStatements = do
 
 --  COMPILER FUNCTIONS --
 
-returnCheckZero :: [String] -> [String]
-returnCheckZero [] = ["push constant 0", "return"]
-returnCheckZero e = e ++ ["return"]
+compileReturn :: [String] -> [String]
+compileReturn [] = ["push constant 0", "return"]
+compileReturn e = e ++ ["return"]
 
 compileLet :: String -> [String] -> [String] -> [String]
 compileLet vn [] e = e ++ ["pop " ++ vn]
