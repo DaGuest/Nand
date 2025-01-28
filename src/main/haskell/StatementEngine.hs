@@ -1,51 +1,54 @@
 module StatementEngine where
 
 import Control.Applicative
+import Data.Char (digitToInt)
+import Data.List (isPrefixOf, isSuffixOf)
 import ExpressionEngine
 import JackTokenizer
+import SymbolTable (split)
 import TokenParser
 
 -- STATEMENTS --
-statements :: Parser [String]
-statements = do
-  concat <$> many statement
+statements :: String -> Parser [String]
+statements cn = do
+  concat <$> many (statement cn)
 
-statement :: Parser [String]
-statement = do
-  letSt <|> ifSt <|> whileSt <|> doSt <|> returnSt
+statement :: String -> Parser [String]
+statement cn = do
+  letSt <|> ifSt cn <|> whileSt cn <|> doSt <|> returnSt
 
 --  LET STATEMENT
 letSt :: Parser [String]
 letSt = do
   sat (isGivenKeyToken "let")
   vn <- getTokenString <$> sat isIdentToken
-  eh <- many $ exprHookOrBrack ("[", "]") -- Aanpassen want dit zorgt voor een 'push _' output
+  eh <- concat <$> many exprHook
   sat (isGivenSymbol "=")
   e <- expr
   sat (isGivenSymbol ";")
-  return $ e ++ ["pop " ++ vn]
+  return $ compileLet vn eh e
 
 --  WHILE STATEMENT
-whileSt :: Parser [String]
-whileSt = do
-  sat (isGivenKeyToken "while")
+whileSt :: String -> Parser [String]
+whileSt cn = do
+  w <- getTokenString <$> sat isWhileToken
   eh <- exprHookOrBrack ("(", ")")
-  ss <- bracketStatements
-  return $ "label WHILE_EXP" : eh ++ ["not", "if-goto WHILE_END"] ++ ss ++ ["goto WHILE_EXP", "label WHILE_END"]
+  ss <- bracketStatements cn
+  return $ ("label " ++ w ++ cn ++ "_EXP") : eh ++ ["not", "if-goto " ++ w ++ cn ++ "_END"] ++ ss ++ ["goto " ++ w ++ cn ++ "_EXP", "label " ++ w ++ cn ++ "_END"]
 
 --  IF STATEMENT
-ifSt :: Parser [String]
-ifSt = do
-  sat (isGivenKeyToken "if")
+ifSt :: String -> Parser [String]
+ifSt cn = do
+  i <- getTokenString <$> sat isIfToken
   eh <- exprHookOrBrack ("(", ")")
-  ss <- bracketStatements
-  el <- concat <$> many elseSt
-  return $ eh ++ ["not", "if-goto IF_FALSE"] ++ ss ++ ["goto IF_END", "label IF_FALSE"] ++ el ++ ["label IF_END"]
+  ss <- bracketStatements cn
+  el <- concat <$> many (elseSt cn)
+  return $ eh ++ ["not", "if-goto " ++ i ++ cn ++ "_FALSE"] ++ ss ++ ["goto " ++ i ++ cn ++ "_END", "label " ++ i ++ cn ++ "_FALSE"] ++ el ++ ["label " ++ i ++ cn ++ "_END"]
 
-elseSt :: Parser [String]
-elseSt = do
+elseSt :: String -> Parser [String]
+elseSt cn = do
   sat (isGivenKeyToken "else")
-  bracketStatements
+  bracketStatements cn
 
 --  DO STATEMENT
 doSt :: Parser [String]
@@ -59,20 +62,26 @@ doSt = do
 returnSt :: Parser [String]
 returnSt = do
   sat (isGivenKeyToken "return")
-  e <- returnCheckZero . concat <$> many expr
+  e <- concat <$> many expr
   sat (isGivenSymbol ";")
-  return e
+  return $ compileReturn e
 
 --  STATEMENT HELPER FUNCTIONS
 
 -- '{ statements }'
-bracketStatements :: Parser [String]
-bracketStatements = do
+bracketStatements :: String -> Parser [String]
+bracketStatements cn = do
   sat (isGivenSymbol "{")
-  ss <- statements
+  ss <- statements cn
   sat (isGivenSymbol "}")
   return ss
 
-returnCheckZero :: [String] -> [String]
-returnCheckZero [] = ["push constant 0", "return"]
-returnCheckZero e = e ++ ["return"]
+--  COMPILER FUNCTIONS --
+
+compileReturn :: [String] -> [String]
+compileReturn [] = ["push constant 0", "return"]
+compileReturn e = e ++ ["return"]
+
+compileLet :: String -> [String] -> [String] -> [String]
+compileLet vn [] e = e ++ ["pop " ++ vn]
+compileLet vn eh e = ["push " ++ vn] ++ eh ++ "add" : e ++ ["pop temp 0", "pop pointer 1", "push temp 0", "pop that 0"]

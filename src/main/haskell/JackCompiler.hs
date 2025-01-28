@@ -13,8 +13,8 @@ main = do
   (args : _) <- getArgs
   files <- fileNames args
   fileContents <- mapM readFile files
-  let fileNameWithTokens = zip files $ map tokenize fileContents
-  mapM (\(f, t) -> writeFile (replaceExtension f ".xml") $ intercalate "\n" $ compile t) fileNameWithTokens
+  let fileNameWithTokens = zip files $ map (tokenize 0) fileContents
+  mapM (\(f, t) -> writeFile (replaceExtension f ".vm") $ intercalate "\n" $ compile t) fileNameWithTokens
 
 -- Helper function that checks if the given argument is a folder
 isFolder :: FilePath -> Bool

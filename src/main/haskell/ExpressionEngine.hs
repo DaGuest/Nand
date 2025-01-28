@@ -1,7 +1,9 @@
 module ExpressionEngine where
 
 import Control.Applicative
+import Data.Char (isLower, isUpper, ord)
 import JackTokenizer
+import SymbolTable
 import TokenParser
 
 -- EXPRESSIONS --
@@ -17,14 +19,13 @@ termExpr = do
 
 termList :: Parser [String]
 termList = do
-  v <- getWrappedToken <$> sat isIdentToken
-  e <- exprHookOrBrack ("[", "]")
-  return (v : e)
+  v <- compileSingleTerm <$> sat isIdentToken
+  e <- exprHook
+  return $ (v ++ e) ++ ["add", "pop pointer 1", "push that 0"]
 
 termSingle :: Parser [String]
 termSingle = do
-  t <- compileSingleTerm <$> sat isTermToken
-  return [t]
+  compileSingleTerm <$> sat isTermToken
 
 termUnaryOp :: Parser [String]
 termUnaryOp = do
@@ -44,6 +45,13 @@ exprHookOrBrack t = do
   sat (isGivenSymbol $ fst t)
   e <- expr
   sat (isGivenSymbol $ snd t)
+  return e
+
+exprHook :: Parser [String]
+exprHook = do
+  sat (isGivenSymbol "[")
+  e <- expr
+  sat (isGivenSymbol "]")
   return e
 
 exprOpTerm :: Parser [String]
@@ -86,14 +94,19 @@ subSubroutineCall :: Parser [String]
 subSubroutineCall = do
   n <- getTokenString <$> sat isIdentToken
   p <- getTokenString <$> sat (isGivenSymbol ".")
-  compileSubsubroutineCall (n ++ p) <$> subroutineCallByName
+  compileSubsubroutineCall (n ++ p) <$> (subroutineCallByName <|> subSubroutineCall)
 
 --  COMPILER FUNCTIONS --
 
-compileSingleTerm :: Token -> String
-compileSingleTerm (TokIdent s) = "push " ++ s
-compileSingleTerm (TokInt i) = "push constant " ++ i
-compileSingleTerm _ = "ERROR"
+compileSingleTerm :: Token -> [String]
+compileSingleTerm (TokIdent s) = ["push " ++ s]
+compileSingleTerm (TokInt i) = ["push constant " ++ i]
+compileSingleTerm (TokKey "this") = ["push pointer 0"]
+compileSingleTerm (TokKey "true") = ["push constant 1", "neg"]
+compileSingleTerm (TokKey "false") = ["push constant 0"]
+compileSingleTerm (TokKey "null") = ["push constant 0"]
+compileSingleTerm (TokStr s) = compileStringConstant s
+compileSingleTerm _ = ["ERROR"]
 
 compileUnaryOpTerm :: Token -> String
 compileUnaryOpTerm (TokSymbol "~") = "not "
@@ -115,4 +128,19 @@ compileSubsubroutineCall :: String -> [String] -> [String]
 compileSubsubroutineCall prefix (x : xs) = (prefix ++ x) : xs
 
 compileSubroutineCall :: [String] -> [String]
-compileSubroutineCall (x : xs) = xs ++ ["call " ++ x]
+compileSubroutineCall (x : xs) = let (a : as) = addTarget x in as ++ xs ++ [a]
+
+compileStringConstant s = ["push constant " ++ show (length s), "call String.new 1"] ++ concatMap compileSingleStringConstant s
+
+compileSingleStringConstant :: Char -> [String]
+compileSingleStringConstant c = ["push constant " ++ show (ord c), "call String.appendChar 2"]
+
+addTarget :: String -> [String]
+addTarget s
+  | length (split s '.') > 1 && head (split s '.') `elem` ["Memory", "Math", "String", "Screen", "Output", "Keyboard", "Array", "Sys"] = ["call " ++ s]
+  | length (split s '.') > 1 && isLower (head $ head (split s '.')) = ["call " ++ addOne s, "push " ++ head (split s '.')]
+  | length (split s '.') > 1 && isUpper (head $ head (split s '.')) = ["call " ++ s]
+  | otherwise = ["call " ++ addOne s, "push pointer 0"]
+
+addOne :: String -> String
+addOne s = let sp = show ((read (last $ words s) :: Integer) + 1) in unwords $ reverse (sp : tail (reverse $ words s))
