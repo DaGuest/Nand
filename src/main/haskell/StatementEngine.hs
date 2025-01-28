@@ -9,13 +9,13 @@ import SymbolTable (split)
 import TokenParser
 
 -- STATEMENTS --
-statements :: Parser [String]
-statements = do
-  concat <$> many statement
+statements :: String -> Parser [String]
+statements cn = do
+  concat <$> many (statement cn)
 
-statement :: Parser [String]
-statement = do
-  letSt <|> ifSt <|> whileSt <|> doSt <|> returnSt
+statement :: String -> Parser [String]
+statement cn = do
+  letSt <|> ifSt cn <|> whileSt cn <|> doSt <|> returnSt
 
 --  LET STATEMENT
 letSt :: Parser [String]
@@ -29,26 +29,26 @@ letSt = do
   return $ compileLet vn eh e
 
 --  WHILE STATEMENT
-whileSt :: Parser [String]
-whileSt = do
+whileSt :: String -> Parser [String]
+whileSt cn = do
   w <- getTokenString <$> sat isWhileToken
   eh <- exprHookOrBrack ("(", ")")
-  ss <- bracketStatements
-  return $ ("label " ++ w ++ "_EXP") : eh ++ ["not", "if-goto " ++ w ++ "_END"] ++ ss ++ ["goto " ++ w ++ "_EXP", "label " ++ w ++ "_END"]
+  ss <- bracketStatements cn
+  return $ ("label " ++ w ++ cn ++ "_EXP") : eh ++ ["not", "if-goto " ++ w ++ cn ++ "_END"] ++ ss ++ ["goto " ++ w ++ cn ++ "_EXP", "label " ++ w ++ cn ++ "_END"]
 
 --  IF STATEMENT
-ifSt :: Parser [String]
-ifSt = do
+ifSt :: String -> Parser [String]
+ifSt cn = do
   i <- getTokenString <$> sat isIfToken
   eh <- exprHookOrBrack ("(", ")")
-  ss <- bracketStatements
-  el <- concat <$> many elseSt
-  return $ eh ++ ["not", "if-goto " ++ i ++ "_FALSE"] ++ ss ++ ["goto " ++ i ++ "_END", "label " ++ i ++ "_FALSE"] ++ el ++ ["label " ++ i ++ "_END"]
+  ss <- bracketStatements cn
+  el <- concat <$> many (elseSt cn)
+  return $ eh ++ ["not", "if-goto " ++ i ++ cn ++ "_FALSE"] ++ ss ++ ["goto " ++ i ++ cn ++ "_END", "label " ++ i ++ cn ++ "_FALSE"] ++ el ++ ["label " ++ i ++ cn ++ "_END"]
 
-elseSt :: Parser [String]
-elseSt = do
+elseSt :: String -> Parser [String]
+elseSt cn = do
   sat (isGivenKeyToken "else")
-  bracketStatements
+  bracketStatements cn
 
 --  DO STATEMENT
 doSt :: Parser [String]
@@ -69,10 +69,10 @@ returnSt = do
 --  STATEMENT HELPER FUNCTIONS
 
 -- '{ statements }'
-bracketStatements :: Parser [String]
-bracketStatements = do
+bracketStatements :: String -> Parser [String]
+bracketStatements cn = do
   sat (isGivenSymbol "{")
-  ss <- statements
+  ss <- statements cn
   sat (isGivenSymbol "}")
   return ss
 

@@ -66,7 +66,7 @@ subroutineDec st cn = do
   sat (isGivenSymbol "{")
   -- Subroutine body
   v <- createEntryTable . addLabel "local" . concat <$> many vardec
-  ss <- map (replaceClassType (v ++ p ++ st) cn) . replaceVar (v ++ p ++ st) <$> statements -- replace variables by it's kind+index
+  ss <- map (replaceClassType (v ++ p ++ st) cn) . replaceVar (v ++ p ++ st) <$> statements cn -- replace variables by it's kind+index
   sat (isGivenSymbol "}")
   return $ compileSubroutine h cn t n (length v) (length p) (length $ filter (\(_, _, k, _) -> k == "this") st) ++ ss
 
