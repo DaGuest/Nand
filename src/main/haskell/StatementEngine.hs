@@ -84,4 +84,4 @@ compileReturn e = e ++ ["return"]
 
 compileLet :: String -> [String] -> [String] -> [String]
 compileLet vn [] e = e ++ ["pop " ++ vn]
-compileLet vn eh e = ["push " ++ vn] ++ eh ++ e ++ ["pop temp 0", "pop pointer 1", "push temp 0", "pop that 0"]
+compileLet vn eh e = ["push " ++ vn] ++ eh ++ "add" : e ++ ["pop temp 0", "pop pointer 1", "push temp 0", "pop that 0"]
