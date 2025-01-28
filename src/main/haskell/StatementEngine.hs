@@ -1,8 +1,11 @@
 module StatementEngine where
 
 import Control.Applicative
+import Data.Char (digitToInt)
+import Data.List (isPrefixOf, isSuffixOf)
 import ExpressionEngine
 import JackTokenizer
+import SymbolTable (split)
 import TokenParser
 
 -- STATEMENTS --
@@ -28,19 +31,19 @@ letSt = do
 --  WHILE STATEMENT
 whileSt :: Parser [String]
 whileSt = do
-  sat (isGivenKeyToken "while")
+  w <- getTokenString <$> sat isWhileToken
   eh <- exprHookOrBrack ("(", ")")
   ss <- bracketStatements
-  return $ "label WHILE_EXP" : eh ++ ["not", "if-goto WHILE_END"] ++ ss ++ ["goto WHILE_EXP", "label WHILE_END"]
+  return $ ("label " ++ w ++ "_EXP") : eh ++ ["not", "if-goto " ++ w ++ "_END"] ++ ss ++ ["goto " ++ w ++ "_EXP", "label " ++ w ++ "_END"]
 
 --  IF STATEMENT
 ifSt :: Parser [String]
 ifSt = do
-  sat (isGivenKeyToken "if")
+  i <- getTokenString <$> sat isIfToken
   eh <- exprHookOrBrack ("(", ")")
   ss <- bracketStatements
   el <- concat <$> many elseSt
-  return $ eh ++ ["not", "if-goto IF_FALSE"] ++ ss ++ ["goto IF_END", "label IF_FALSE"] ++ el ++ ["label IF_END"]
+  return $ eh ++ ["not", "if-goto " ++ i ++ "_FALSE"] ++ ss ++ ["goto " ++ i ++ "_END", "label " ++ i ++ "_FALSE"] ++ el ++ ["label " ++ i ++ "_END"]
 
 elseSt :: Parser [String]
 elseSt = do

@@ -102,7 +102,7 @@ compileSingleTerm :: Token -> [String]
 compileSingleTerm (TokIdent s) = ["push " ++ s]
 compileSingleTerm (TokInt i) = ["push constant " ++ i]
 compileSingleTerm (TokKey "this") = ["push pointer 0"]
-compileSingleTerm (TokKey "true") = ["push constant 0", "not"]
+compileSingleTerm (TokKey "true") = ["push constant 1", "neg"]
 compileSingleTerm (TokKey "false") = ["push constant 0"]
 compileSingleTerm (TokKey "null") = ["push constant 0"]
 compileSingleTerm (TokStr s) = compileStringConstant s

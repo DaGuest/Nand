@@ -74,6 +74,7 @@ getTypeName varName ts orig cn
   | lookUpVar varName ts == [] = addClassNameToCall orig cn
   | otherwise = "call " ++ getType (head $ lookUpVar varName ts) ++ "." ++ last (split varName '.')
 
+getTypeUpper :: String -> [Entry] -> String -> String
 getTypeUpper varName ts orig
   | lookUpVar varName ts == [] = orig
   | otherwise = "call " ++ getType (head $ lookUpVar varName ts) ++ "." ++ last (split orig '.')
