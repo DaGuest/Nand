@@ -52,7 +52,8 @@ replay_pid*
 # JACK rules
 # -------- #
 
-/src/main/jack/*
+/src/main/jack/game/*
+/src/main/jack/os/*
 !*.jack
 
 # Haskell rules
