@@ -8,26 +8,83 @@
  * consists of 32,768 words, each holding a 16-bit binary number.
  */ 
 class Memory {
+    static Array ram, heap, freelist;
 
     /** Initializes the class. */
     function void init() {
+        let ram = 0;
+        let heap = 2048;
+        let freelist = heap;
+        let heap[0] = 0;
+        let heap[1] = 14334;
+        return;
     }
 
     /** Returns the RAM value at the given address. */
     function int peek(int address) {
+        return ram[address];
     }
 
     /** Sets the RAM value at the given address to the given value. */
     function void poke(int address, int value) {
+        let ram[address] = value;
+        return;
     }
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
-    function int alloc(int size) {
+    function Array alloc(int size) {
+        var int block;
+        let block = Memory.getBlock(size, freelist);
+        return block + 2;
     }
 
+    function int getBlock(int size, int address) {
+        var int next, blockSize;
+        
+        let next = address[0];
+        let blockSize = address[1];
+
+        if (blockSize > (size + 1)) {
+            return Memory.allocateBlock(size, address);
+        }
+        else {
+            if (next = 0) {
+                return -1;
+            }
+            else {
+                return Memory.getBlock(size, next);
+            }
+        }
+    }
+
+    function int allocateBlock(int size, int address) {
+        var int blockSize, newAddress;
+
+        let blockSize = address[1];
+        let newAddress = address + 2 + (blockSize - (size + 2));
+        
+        // Set new blockSize of victim block
+        let address[1] = blockSize - (size + 2);
+        // Set blockSize of new block
+        let newAddress[0] = 0;
+        let newAddress[1] = size;
+        return newAddress;
+    }
+ 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
+        var Array next;
+
+        let next = freelist[0];
+
+        // Iterate through linked list until end is found.
+        while(~(next = 0)) {
+            let next = next[0];
+        }
+
+        let next[0] = (o - 2); // Set the new block address in the current last segment of the freellist.
+        return;
     }    
 }
