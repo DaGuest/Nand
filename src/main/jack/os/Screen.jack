@@ -211,6 +211,24 @@ class Screen {
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
+        var int dy, startx, endx;
+        if (r > 181) {
+            let r = 181;
+        }
+        let dy = r;
+        let stop = -(r+1)
+        while ((dy > stop) & ((y + dy) > 0)) {
+            let startx = x - Screen.pythagoras(r, dy);
+            let endx = x + Screen.pythagoras(r, dy);
+            do Screen.drawHorizontalLine(startx, endx, y + dy);
+            let dy = dy - 1;
+        }
         return;
+    }
+
+    function int pythagoras(int x, int y) {
+        var int pow;
+        let pow = (x * x) - (y * y);
+        return Math.sqrt(pow);
     }
 }
