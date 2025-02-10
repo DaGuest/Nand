@@ -73,16 +73,17 @@ class Math {
     }
 
     function int divideHelper(int x, int y) {
-        var int q;
+        var int q, twoQ;
         if ((y > x) | (y < 0)) {
             return 0;
         }
-        let q = Math.divide(x, 2 * y);
-        if ((x - (2 * q * y)) < y) {
-            return 2 * q;
+        let q = Math.divideHelper(x, y + y);
+        let twoQ = q + q;
+        if ((x - (twoQ * y)) < y) {
+            return twoQ;
         }
         else {
-            return (2 * q) + 1;
+            return twoQ + 1;
         }
     }
 
@@ -123,11 +124,8 @@ class Math {
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
-        if (x = (-32767)) {
-            return 32767;
-        }
         if (x < 0) {
-            return x * (-1);
+            return -x;
         }
         return x;
     }
