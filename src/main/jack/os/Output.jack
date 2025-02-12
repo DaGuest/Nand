@@ -17,9 +17,12 @@ class Output {
 
     // Character map for displaying characters
     static Array charMaps; 
+    static int cursorx, cursory;
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
+        do Output.initMap();
+        return;
     }
 
     // Initializes the character map array
@@ -142,9 +145,9 @@ class Output {
     // Creates the character map array of the given character index, using the given values.
     function void create(int index, int a, int b, int c, int d, int e,
                          int f, int g, int h, int i, int j, int k) {
-	var Array map;
+        var Array map;
 
-	let map = Array.new(11);
+        let map = Array.new(11);
         let charMaps[index] = map;
 
         let map[0] = a;
@@ -175,28 +178,87 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+        // Move cursor
+        if (j > 63) {
+            let cursorx = 0;
+            let cursory = i + 1;
+        }
+        else {
+            let cursorx = j;
+            let cursory = i;
+        }
+
+        // Erase character at cursor
+        do Output.writeCharInMemory(32, cursorx, cursory);
+        return;
     }
 
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
+        // Display character at cursor location
+        do Output.writeCharInMemory(c, cursorx, cursory);
+        
+        // Move cursor to next column
+        do Output.moveCursor(cursory, cursorx + 1);
+        return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        let cursorx = 0;
+        let cursory = cursory + 1;
+        return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+        return;
+    }
+
+    /** Write the given character into memory at the given x,y slot */
+    function void writeCharInMemory(char c, int x, int y) {
+        var Array map;
+        var int address, value, i;
+        var boolean shift;
+
+        let map = charMaps[c];
+        let address = 16384 + (y * 352);
+
+        if ((x & 1) = 1) {
+            let shift = true;
+            let address = address + ((x - 1) / 2);
+        }
+        else {
+            let shift = false;
+            let address = address + (x / 2);
+        }
+
+        while (i < 11) {
+            if (shift) {
+                // Take only front end of Mem(address) and add on value of char.
+                let value = (Memory.peek(address) & 255) + (map[i] * 256);
+            }
+            else {
+                // Take only tail end of Mem(address) and add on value of char.
+                let value = (Memory.peek(address) & (-256)) + (map[i]);
+            }
+            do Memory.poke(address,value);
+            let address = address + 32;
+            let i = i + 1;
+        }
+        return;
     }
 }
